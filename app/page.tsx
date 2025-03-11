@@ -54,7 +54,6 @@ export default function Home() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#000000'
         }}
       >
         <div className="relative mb-8">
