@@ -109,6 +109,7 @@ export default function Home() {
                 height={isMobile ? 250 : 300}
                 className="rounded-lg shadow-xl"
                 priority
+                sizes="(max-width: 768px) 250px, 300px"
               />
             </motion.div>
             <motion.div 
