@@ -134,12 +134,12 @@ export default function EventsPage() {
                 />
                 <div className="absolute bottom-0 left-0 right-0 p-8 z-20 text-white">
                   <div>
-                    <span className="inline-block px-3 py-1 mb-4 bg-blue-600 rounded-full text-sm font-semibold">
+                    <span className="inline-block px-3 py-1 mb-4 bg-blue-600 rounded-full text-sm font-semibold text-white">
                       Featured Event
                     </span>
-                    <h2 className="text-4xl font-bold mb-2">{featuredEvents[currentFeaturedIndex]?.title}</h2>
-                    <p className="text-xl mb-3">{featuredEvents[currentFeaturedIndex]?.date}</p>
-                    <p className="text-gray-200 max-w-2xl">{featuredEvents[currentFeaturedIndex]?.description}</p>
+                    <h2 className="text-4xl font-bold mb-2 text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">{featuredEvents[currentFeaturedIndex]?.title}</h2>
+                    <p className="text-xl mb-3 text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">{featuredEvents[currentFeaturedIndex]?.date}</p>
+                    <p className="text-white max-w-2xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">{featuredEvents[currentFeaturedIndex]?.description}</p>
                   </div>
                 </div>
               </div>
