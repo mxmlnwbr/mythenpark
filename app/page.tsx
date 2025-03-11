@@ -42,21 +42,9 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       <div 
-        className="flex flex-col items-center justify-center p-4"
-        style={{
-          height: '100vh',
-          overflow: isMobile ? 'hidden' : 'auto',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
+        className="flex flex-col items-center justify-center"
       >
-        <div className="relative mb-8">
+        <div className="relative mt-8 mb-8">
           <Image
             src="/Mythenpark-Logo.jpg"
             alt="Mythenpark logo"
