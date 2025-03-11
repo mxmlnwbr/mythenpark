@@ -1,9 +1,9 @@
 "use client"
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 
 // Define snowflake type
 interface Snowflake {
@@ -13,6 +13,48 @@ interface Snowflake {
   animationDuration: string;
   animationDelay: string;
 }
+
+// Stats data
+const statsData = [
+  { label: "Obstacles", value: 25 },
+  { label: "Team Members", value: 15 },
+  { label: "Events per year", value: 7 },
+  { label: "Working hours per year", value: 2300 },
+];
+
+// CountUp component
+const CountUp = ({ end, duration = 2 }: { end: number; duration?: number }) => {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  
+  useEffect(() => {
+    if (!isInView) return;
+    
+    let startTime: number;
+    let animationFrame: number;
+    
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
+      setCount(Math.floor(progress * end));
+      
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
+    
+    animationFrame = requestAnimationFrame(animate);
+    
+    return () => {
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
+  }, [end, duration, isInView]);
+  
+  return <div ref={ref}>{count}</div>;
+};
 
 export default function Home() {
   const [isActive, setIsActive] = useState(false);
@@ -132,11 +174,37 @@ export default function Home() {
             <p className="text-lg text-gray-600 max-w-md mx-auto">Experience the thrill of adventure in one of Switzerland's most beautiful mountain parks.</p>
           </motion.div>
           
+          {/* Stats Section */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.0, duration: 0.5 }}
+            className="w-full max-w-4xl mb-12"
+          >
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+              {statsData.map((stat, index) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 1.2 + index * 0.2, duration: 0.5 }}
+                  className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                  whileHover={{ scale: 1.03 }}
+                >
+                  <div className="text-3xl md:text-4xl font-bold text-blue-600 mb-2">
+                    <CountUp end={stat.value} />
+                  </div>
+                  <div className="text-sm md:text-base font-medium text-gray-700">{stat.label}</div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+          
           <motion.div 
             className="flex flex-col md:flex-row gap-4 mb-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.2, duration: 0.5 }}
+            transition={{ delay: 1.8, duration: 0.5 }}
           >
             <motion.a 
               href="/events" 
@@ -166,7 +234,7 @@ export default function Home() {
             }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.5, duration: 0.5 }}
+            transition={{ delay: 2.0, duration: 0.5 }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsActive(true)}

@@ -23,26 +23,6 @@ export default function AboutUs() {
             Das Parkterrain weist eine ideale Mischung zwischen steil und flach auf, wodurch man gute Voraussetzungen hat für abwechslungsreiche Lines. Ausserdem ist er vom normalen Pistennetz klar getrennt. Der Park umfasst rund 20-25 Obstacles in verschiedenen Schwierigkeitsgraden. Für alle die sich erst einmal an das Ganze herantasten möchten, wird eine Beginnerline erstellt. Wenn Einer nicht mehr kann, chillt er's am Parkende bei der 1291(Snow-)Bar und geniest seinen Pausentee. Dort befindet sich auch ein Imbissstand und ein grosses Selbstbedienungs-Restaurant. Während allen Anlässen sorgt ein DJ für gute Beats.
           </p>
           
-          {/* Stats Section */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 my-8">
-            <div className="text-center">
-              <div className="text-4xl font-bold">25</div>
-              <div>Obstacles</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold">15</div>
-              <div>Team Members</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold">7</div>
-              <div>Events per year</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold">2300</div>
-              <div>Working hours per year</div>
-            </div>
-          </div>
-          
           {/* Travel Information */}
           <div className="mt-8">
             <h2 className="text-2xl font-bold mb-4">Anreise</h2>
