@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "./navbar";
+import Navbar from "@/components/ui/navbar";
 import Footer from "@/components/ui/footer";
 // Ensuring TypeScript recognizes the navbar component
 
