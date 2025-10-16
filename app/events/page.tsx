@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import { ThumbsUp, Calendar, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ThumbsUp, Calendar, Sparkles, X, MapPin, Clock, Users } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Define event type
 type Event = {
@@ -60,6 +60,8 @@ export default function EventsPage() {
   const [voteCounts, setVoteCounts] = useState<Record<number, number>>({});
   const [userVotes, setUserVotes] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
 
   // Load votes from API and localStorage on mount
@@ -87,8 +89,21 @@ export default function EventsPage() {
   }, []);
 
 
+  // Open modal with event details
+  const openModal = (event: Event) => {
+    setSelectedEvent(event);
+    setIsModalOpen(true);
+  };
+
+  // Close modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => setSelectedEvent(null), 300);
+  };
+
   // Handle vote/unvote
-  const handleVote = async (eventId: number) => {
+  const handleVote = async (eventId: number, e?: React.MouseEvent) => {
+    e?.stopPropagation(); // Prevent modal from opening when voting
     const hasVoted = userVotes.has(eventId);
     const action = hasVoted ? 'downvote' : 'upvote';
     
@@ -186,7 +201,8 @@ export default function EventsPage() {
               key={event.id}
               variants={cardVariants}
               whileHover={{ y: -10, transition: { duration: 0.3 } }}
-              className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500"
+              onClick={() => openModal(event)}
+              className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer"
             >
               {/* Featured Badge */}
               {event.featured && (
@@ -268,7 +284,7 @@ export default function EventsPage() {
                   transition={{ delay: index * 0.1 + 0.7 }}
                 >
                   <motion.button 
-                    onClick={() => handleVote(event.id)}
+                    onClick={(e) => handleVote(event.id, e)}
                     className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
                       userVotes.has(event.id)
                         ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50'
@@ -302,6 +318,169 @@ export default function EventsPage() {
           ))}
         </motion.div>
       </div>
+
+      {/* Event Details Modal */}
+      <AnimatePresence>
+        {isModalOpen && selectedEvent && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeModal}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            >
+              {/* Modal Header Image */}
+              <div className="relative h-64 overflow-hidden">
+                <div 
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url(${selectedEvent.imageUrl})` }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                
+                {/* Close Button */}
+                <motion.button
+                  onClick={closeModal}
+                  className="absolute top-4 right-4 p-2 bg-white/90 hover:bg-white rounded-full transition-colors shadow-lg"
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <X className="w-6 h-6 text-gray-800" />
+                </motion.button>
+
+                {/* Featured Badge */}
+                {selectedEvent.featured && (
+                  <div className="absolute top-4 left-4 flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-2 rounded-full text-sm font-bold shadow-lg">
+                    <Sparkles className="w-4 h-4" />
+                    Featured Event
+                  </div>
+                )}
+
+                {/* Category Badge */}
+                <div className="absolute bottom-4 left-4">
+                  <span className={`inline-block px-4 py-2 rounded-full text-sm font-bold text-white backdrop-blur-md shadow-lg ${
+                    selectedEvent.category === 'competition' ? 'bg-red-500/95' : 
+                    selectedEvent.category === 'workshop' ? 'bg-green-500/95' : 'bg-purple-500/95'
+                  }`}>
+                    {selectedEvent.category === 'competition' ? '🏆 Competition' : 
+                     selectedEvent.category === 'workshop' ? '🎓 Workshop' : '✨ Special Event'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-8 space-y-6">
+                {/* Title */}
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                    {selectedEvent.title}
+                  </h2>
+                  <div className="flex items-center gap-2 text-blue-600">
+                    <Calendar className="w-5 h-5" />
+                    <span className="text-lg font-semibold">{selectedEvent.date}</span>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="space-y-3">
+                  <h3 className="text-xl font-bold text-gray-900">About this Event</h3>
+                  <p className="text-gray-700 leading-relaxed">
+                    {selectedEvent.description}
+                  </p>
+                </div>
+
+                {/* Event Details Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
+                  <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl">
+                    <Clock className="w-6 h-6 text-blue-600" />
+                    <div>
+                      <p className="text-xs text-gray-600 font-medium">Duration</p>
+                      <p className="text-sm font-bold text-gray-900">Full Day</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-xl">
+                    <MapPin className="w-6 h-6 text-purple-600" />
+                    <div>
+                      <p className="text-xs text-gray-600 font-medium">Location</p>
+                      <p className="text-sm font-bold text-gray-900">Mythenpark</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-4 bg-green-50 rounded-xl">
+                    <Users className="w-6 h-6 text-green-600" />
+                    <div>
+                      <p className="text-xs text-gray-600 font-medium">Participants</p>
+                      <p className="text-sm font-bold text-gray-900">{voteCounts[selectedEvent.id] || 0} joined</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional Info */}
+                <div className="space-y-3">
+                  <h3 className="text-xl font-bold text-gray-900">What to Expect</h3>
+                  <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-1">✓</span>
+                      <span>Professional instructors and guides</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-1">✓</span>
+                      <span>All skill levels welcome</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-1">✓</span>
+                      <span>Equipment rental available on-site</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-1">✓</span>
+                      <span>Refreshments and breaks included</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-4 pt-4">
+                  <motion.button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleVote(selectedEvent.id);
+                    }}
+                    className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold text-lg transition-all duration-300 ${
+                      userVotes.has(selectedEvent.id)
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <ThumbsUp className={`w-5 h-5 ${
+                      userVotes.has(selectedEvent.id) ? 'fill-current' : ''
+                    }`} />
+                    <span>{voteCounts[selectedEvent.id] || 0}</span>
+                    <span className="text-sm">
+                      {userVotes.has(selectedEvent.id) ? 'Participating!' : 'Join Event'}
+                    </span>
+                  </motion.button>
+                  <motion.button
+                    onClick={closeModal}
+                    className="px-8 py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-semibold transition-colors"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Close
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
