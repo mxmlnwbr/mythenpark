@@ -63,6 +63,13 @@ export default function EventsPage() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [syncingVotes, setSyncingVotes] = useState<Set<number>>(new Set()); // Track which events are syncing
+  
+  // Registration form state
+  const [showRegistrationForm, setShowRegistrationForm] = useState(false);
+  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '' });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
   // Load votes from API and localStorage on mount
   useEffect(() => {
@@ -98,7 +105,81 @@ export default function EventsPage() {
   // Close modal
   const closeModal = () => {
     setIsModalOpen(false);
+    setShowRegistrationForm(false);
+    setRegistrationSuccess(false);
+    setFormData({ firstName: '', lastName: '', email: '' });
+    setFormErrors({});
     setTimeout(() => setSelectedEvent(null), 300);
+  };
+
+  // Validate form
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    
+    if (!formData.firstName.trim()) {
+      errors.firstName = 'First name is required';
+    } else if (formData.firstName.trim().length < 2) {
+      errors.firstName = 'First name must be at least 2 characters';
+    } else if (!/^[a-zA-ZÀ-ÿ\s'-]+$/.test(formData.firstName)) {
+      errors.firstName = 'First name can only contain letters';
+    }
+    
+    if (!formData.lastName.trim()) {
+      errors.lastName = 'Last name is required';
+    } else if (formData.lastName.trim().length < 2) {
+      errors.lastName = 'Last name must be at least 2 characters';
+    } else if (!/^[a-zA-ZÀ-ÿ\s'-]+$/.test(formData.lastName)) {
+      errors.lastName = 'Last name can only contain letters';
+    }
+    
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Handle form submission
+  const handleRegistrationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm() || !selectedEvent) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      const response = await fetch('/api/registrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId: selectedEvent.id,
+          ...formData,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to register');
+      }
+      
+      // Success!
+      setRegistrationSuccess(true);
+      setFormData({ firstName: '', lastName: '', email: '' });
+      setFormErrors({});
+      
+      // Also mark as participating
+      if (!userVotes.has(selectedEvent.id)) {
+        handleVote(selectedEvent.id);
+      }
+    } catch (error: any) {
+      setFormErrors({ submit: error.message || 'Failed to register. Please try again.' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Handle vote/unvote with optimistic UI updates
@@ -493,8 +574,146 @@ export default function EventsPage() {
                   </ul>
                 </div>
 
+                {/* Registration Form */}
+                {!showRegistrationForm && !registrationSuccess && (
+                  <div className="pt-4">
+                    <button
+                      onClick={() => setShowRegistrationForm(true)}
+                      className="w-full px-6 py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-xl transition-colors"
+                    >
+                      📝 Sign Up for this Event
+                    </button>
+                  </div>
+                )}
+
+                {showRegistrationForm && !registrationSuccess && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="space-y-4 pt-4 border-t border-gray-200"
+                  >
+                    <h3 className="text-xl font-bold text-gray-900">Event Registration</h3>
+                    <form onSubmit={handleRegistrationSubmit} className="space-y-4">
+                      {/* First Name */}
+                      <div>
+                        <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                          First Name *
+                        </label>
+                        <input
+                          type="text"
+                          id="firstName"
+                          value={formData.firstName}
+                          onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            formErrors.firstName ? 'border-red-500' : 'border-gray-300'
+                          }`}
+                          placeholder="Enter your first name"
+                        />
+                        {formErrors.firstName && (
+                          <p className="mt-1 text-sm text-red-600">{formErrors.firstName}</p>
+                        )}
+                      </div>
+
+                      {/* Last Name */}
+                      <div>
+                        <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                          Last Name *
+                        </label>
+                        <input
+                          type="text"
+                          id="lastName"
+                          value={formData.lastName}
+                          onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            formErrors.lastName ? 'border-red-500' : 'border-gray-300'
+                          }`}
+                          placeholder="Enter your last name"
+                        />
+                        {formErrors.lastName && (
+                          <p className="mt-1 text-sm text-red-600">{formErrors.lastName}</p>
+                        )}
+                      </div>
+
+                      {/* Email */}
+                      <div>
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                          Email Address *
+                        </label>
+                        <input
+                          type="email"
+                          id="email"
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            formErrors.email ? 'border-red-500' : 'border-gray-300'
+                          }`}
+                          placeholder="your.email@example.com"
+                        />
+                        {formErrors.email && (
+                          <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>
+                        )}
+                      </div>
+
+                      {/* Submit Error */}
+                      {formErrors.submit && (
+                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                          <p className="text-sm text-red-600">{formErrors.submit}</p>
+                        </div>
+                      )}
+
+                      {/* Form Actions */}
+                      <div className="flex gap-3 pt-2">
+                        <motion.button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                          whileHover={!isSubmitting ? { scale: 1.02 } : {}}
+                          whileTap={!isSubmitting ? { scale: 0.98 } : {}}
+                        >
+                          {isSubmitting ? 'Submitting...' : 'Complete Registration'}
+                        </motion.button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowRegistrationForm(false);
+                            setFormErrors({});
+                          }}
+                          className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </motion.div>
+                )}
+
+                {registrationSuccess && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="p-6 bg-green-50 border-2 border-green-200 rounded-xl text-center space-y-3"
+                  >
+                    <div className="text-5xl">✓</div>
+                    <h3 className="text-xl font-bold text-green-800">Registration Successful!</h3>
+                    <p className="text-green-700">
+                      You're all set for {selectedEvent.title}. Check your email for confirmation details.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setRegistrationSuccess(false);
+                        setShowRegistrationForm(false);
+                      }}
+                      className="mt-4 px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+                    >
+                      Done
+                    </button>
+                  </motion.div>
+                )}
+
                 {/* Action Buttons */}
-                <div className="flex gap-4 pt-4">
+                {!showRegistrationForm && !registrationSuccess && (
+                  <div className="flex gap-4 pt-4">
                   <motion.button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -535,6 +754,7 @@ export default function EventsPage() {
                     Close
                   </motion.button>
                 </div>
+                )}
               </div>
             </motion.div>
           </motion.div>
