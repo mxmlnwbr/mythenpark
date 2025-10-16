@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import { ThumbsUp } from 'lucide-react';
+import { ThumbsUp, Calendar, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 // Define event type
 type Event = {
@@ -83,9 +84,6 @@ export default function EventsPage() {
     }
   ];
 
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [filteredEvents, setFilteredEvents] = useState<Event[]>(events);
-  const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
   const [voteCounts, setVoteCounts] = useState<Record<number, number>>({});
   const [userVotes, setUserVotes] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
@@ -115,31 +113,6 @@ export default function EventsPage() {
     loadVoteData();
   }, []);
 
-  // Filter events based on selected category
-  useEffect(() => {
-    if (selectedCategory === 'all') {
-      setFilteredEvents(events);
-    } else {
-      setFilteredEvents(events.filter(event => event.category === selectedCategory));
-    }
-  }, [selectedCategory]);
-
-  // Rotate featured events
-  useEffect(() => {
-    const featuredEvents = events.filter(event => event.featured);
-    
-    const interval = setInterval(() => {
-      setCurrentFeaturedIndex(prevIndex => 
-        prevIndex === featuredEvents.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 5000);
-    
-    return () => clearInterval(interval);
-  }, [events]);
-
-
-
-  const featuredEvents = events.filter(event => event.featured);
 
   // Handle vote/unvote
   const handleVote = async (eventId: number) => {
@@ -177,166 +150,185 @@ export default function EventsPage() {
   // Show loading state while fetching vote data
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"></div>
-          <p className="text-xl text-gray-600 dark:text-gray-300">Loading events...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <motion.div 
+          className="text-center"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <motion.div 
+            className="inline-block rounded-full h-20 w-20 border-4 border-blue-500 border-t-transparent mb-6"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
+          <motion.p 
+            className="text-xl text-gray-600"
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            Loading events...
+          </motion.p>
+        </motion.div>
       </div>
     );
   }
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 50 },
+    show: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 15
+      }
+    }
+  };
+
   return (
-    <div className="min-h-screen">
-      <div className="container mx-auto px-4 py-12 max-w-6xl">
-        <h1 className="text-5xl font-bold mb-2 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-          Upcoming Events
-        </h1>
-        
-        <p className="text-xl text-center mb-12 text-gray-600 dark:text-gray-300">
-          Join us for exciting snow adventures and competitions
-        </p>
-
-        {/* Featured Event Carousel */}
-        <div className="relative h-96 mb-16 overflow-hidden rounded-2xl shadow-2xl">
-          <div key={featuredEvents[currentFeaturedIndex]?.id} className="absolute inset-0 bg-black">
-              <div className="relative h-full w-full">
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent opacity-80 z-10" />
-                <div 
-                  className="absolute inset-0 z-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${featuredEvents[currentFeaturedIndex]?.imageUrl})` }}
-                />
-                <div className="absolute bottom-0 left-0 right-0 p-8 z-20 text-white">
-                  <div>
-                    <span className="inline-block px-3 py-1 mb-4 bg-blue-600 rounded-full text-sm font-semibold text-white">
-                      Featured Event
-                    </span>
-                    <h2 className="text-4xl font-bold mb-2 text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">{featuredEvents[currentFeaturedIndex]?.title}</h2>
-                    <p className="text-xl mb-3 text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">{featuredEvents[currentFeaturedIndex]?.date}</p>
-                    <p className="text-white max-w-2xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">{featuredEvents[currentFeaturedIndex]?.description}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          
-          {/* Carousel indicators */}
-          <div className="absolute bottom-4 right-4 z-30 flex space-x-2">
-            {featuredEvents.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentFeaturedIndex(index)}
-                className={`w-3 h-3 rounded-full ${
-                  index === currentFeaturedIndex ? 'bg-white' : 'bg-gray-400 bg-opacity-50'
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Category filters */}
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
-          <FilterButton 
-            label="All Events" 
-            isActive={selectedCategory === 'all'} 
-            onClick={() => setSelectedCategory('all')} 
-          />
-          <FilterButton 
-            label="Competitions" 
-            isActive={selectedCategory === 'competition'} 
-            onClick={() => setSelectedCategory('competition')} 
-          />
-          <FilterButton 
-            label="Workshops" 
-            isActive={selectedCategory === 'workshop'} 
-            onClick={() => setSelectedCategory('workshop')} 
-          />
-          <FilterButton 
-            label="Special Events" 
-            isActive={selectedCategory === 'special'} 
-            onClick={() => setSelectedCategory('special')} 
-          />
-        </div>
-
-        {/* Events grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredEvents.map((event) => (
-              <div
-                key={event.id}
-                className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
-              >
-                <div className="h-48 relative overflow-hidden">
-                  <div 
-                    className="absolute inset-0 bg-cover bg-center transform transition-transform duration-700 hover:scale-110"
-                    style={{ backgroundImage: `url(${event.imageUrl})` }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent opacity-60" />
-                  <div className="absolute bottom-0 left-0 p-4">
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold text-white ${
-                      event.category === 'competition' ? 'bg-red-500' : 
-                      event.category === 'workshop' ? 'bg-green-500' : 'bg-purple-500'
-                    }`}>
-                      {event.category === 'competition' ? 'Competition' : 
-                       event.category === 'workshop' ? 'Workshop' : 'Special Event'}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{event.title}</h3>
-                  <p className="text-blue-600 dark:text-blue-400 mb-4">{event.date}</p>
-                  <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">{event.description}</p>
-                  
-                  {/* Vote Section */}
-                  <div className="flex items-center justify-between mt-4">
-                    <button 
-                      onClick={() => handleVote(event.id)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 ${
-                        userVotes.has(event.id)
-                          ? 'bg-blue-600 text-white shadow-lg'
-                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                      }`}
-                    >
-                      <ThumbsUp className={`w-4 h-4 ${userVotes.has(event.id) ? 'fill-current' : ''}`} />
-                      <span className="font-semibold">{voteCounts[event.id] || 0}</span>
-                      <span className="text-sm">{userVotes.has(event.id) ? 'Participating' : 'Participate'}</span>
-                    </button>
-                    <button className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-300">
-                      Learn More
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-        </div>
-        
-        {/* Empty state */}
-        {filteredEvents.length === 0 && (
-          <div className="text-center py-16">
-            <p className="text-2xl text-gray-500 dark:text-gray-400">No events found in this category</p>
-            <button 
-              onClick={() => setSelectedCategory('all')}
-              className="mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-16 px-4">
+      <div className="container mx-auto max-w-7xl">
+        {/* Events Grid */}
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+        >
+          {events.map((event, index) => (
+            <motion.div
+              key={event.id}
+              variants={cardVariants}
+              whileHover={{ y: -10, transition: { duration: 0.3 } }}
+              className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500"
             >
-              View all events
-            </button>
-          </div>
-        )}
+              {/* Featured Badge */}
+              {event.featured && (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 + 0.5 }}
+                  className="absolute top-4 left-4 z-20 flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  Featured
+                </motion.div>
+              )}
+
+              {/* Image Section */}
+              <div className="h-56 relative overflow-hidden">
+                <motion.div 
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url(${event.imageUrl})` }}
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ duration: 0.6 }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                
+                {/* Category Badge */}
+                <motion.div 
+                  className="absolute bottom-4 left-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 + 0.3 }}
+                >
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold text-white backdrop-blur-sm ${
+                    event.category === 'competition' ? 'bg-red-500/90' : 
+                    event.category === 'workshop' ? 'bg-green-500/90' : 'bg-purple-500/90'
+                  }`}>
+                    {event.category === 'competition' ? '🏆 Competition' : 
+                     event.category === 'workshop' ? '🎓 Workshop' : '✨ Special'}
+                  </span>
+                </motion.div>
+              </div>
+
+              {/* Content Section */}
+              <div className="p-6 space-y-4">
+                {/* Title */}
+                <motion.h3 
+                  className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: index * 0.1 + 0.4 }}
+                >
+                  {event.title}
+                </motion.h3>
+                
+                {/* Date */}
+                <motion.div 
+                  className="flex items-center gap-2 text-blue-600"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 + 0.5 }}
+                >
+                  <Calendar className="w-4 h-4" />
+                  <span className="text-sm font-medium">{event.date}</span>
+                </motion.div>
+                
+                {/* Description */}
+                <motion.p 
+                  className="text-gray-600 text-sm line-clamp-3 leading-relaxed"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: index * 0.1 + 0.6 }}
+                >
+                  {event.description}
+                </motion.p>
+                
+                {/* Vote Button */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 + 0.7 }}
+                >
+                  <motion.button 
+                    onClick={() => handleVote(event.id)}
+                    className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                      userVotes.has(event.id)
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <ThumbsUp className={`w-5 h-5 ${
+                      userVotes.has(event.id) ? 'fill-current' : ''
+                    }`} />
+                    <span className="text-lg font-bold">{voteCounts[event.id] || 0}</span>
+                    <span className="text-sm">
+                      {userVotes.has(event.id) ? 'Participating!' : 'Join Event'}
+                    </span>
+                  </motion.button>
+                </motion.div>
+              </div>
+
+              {/* Animated Border Effect */}
+              <motion.div
+                className="absolute inset-0 rounded-2xl pointer-events-none"
+                initial={{ opacity: 0 }}
+                whileHover={{ 
+                  opacity: 1,
+                  boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)"
+                }}
+                transition={{ duration: 0.3 }}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
     </div>
-  );
-}
-
-// Filter button component
-function FilterButton({ label, isActive, onClick }: { label: string, isActive: boolean, onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
-        isActive 
-          ? 'bg-blue-600 text-white shadow-lg' 
-          : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-      }`}
-    >
-      {label}
-    </button>
   );
 }
