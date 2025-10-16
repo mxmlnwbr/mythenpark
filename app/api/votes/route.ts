@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
+// In-memory storage for local development (fallback when no DB)
+let memoryVotes: Record<number, number> = {};
+
+// Check if database is configured
+function isDatabaseConfigured(): boolean {
+  return !!process.env.POSTGRES_URL;
+}
+
 // Initialize database table
 async function initTable() {
   try {
@@ -17,6 +25,11 @@ async function initTable() {
 
 // Read all votes
 async function readVotes(): Promise<Record<number, number>> {
+  // Use in-memory storage if no database configured (local dev)
+  if (!isDatabaseConfigured()) {
+    return memoryVotes;
+  }
+  
   try {
     await initTable();
     const { rows } = await sql`SELECT event_id, vote_count FROM event_votes`;
@@ -33,6 +46,12 @@ async function readVotes(): Promise<Record<number, number>> {
 
 // Update vote for a specific event
 async function updateVote(eventId: number, newCount: number) {
+  // Use in-memory storage if no database configured (local dev)
+  if (!isDatabaseConfigured()) {
+    memoryVotes[eventId] = newCount;
+    return;
+  }
+  
   try {
     await initTable();
     await sql`
