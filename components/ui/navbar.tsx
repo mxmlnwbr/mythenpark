@@ -155,9 +155,6 @@ export default function Navbar() {
               <Link href="/events" className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">
                 Events
               </Link>
-              <Link href="/media" className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">
-                Media
-              </Link>
               <Link href="/about" className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">
                 About Us
               </Link>

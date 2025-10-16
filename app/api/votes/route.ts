@@ -25,8 +25,11 @@ async function initTable() {
 async function readVotes(): Promise<Record<number, number>> {
   // Use in-memory storage if no database configured (local dev)
   if (!isDatabaseConfigured()) {
+    console.log(`[${process.env.NODE_ENV?.toUpperCase()}] Using IN-MEMORY storage. Votes:`, memoryVotes);
     return memoryVotes;
   }
+  
+  console.log(`[${process.env.NODE_ENV?.toUpperCase()}] Using DATABASE storage`);
   
   try {
     await initTable();
@@ -47,8 +50,11 @@ async function updateVote(eventId: number, newCount: number) {
   // Use in-memory storage if no database configured (local dev)
   if (!isDatabaseConfigured()) {
     memoryVotes[eventId] = newCount;
+    console.log(`[${process.env.NODE_ENV?.toUpperCase()}] Updated IN-MEMORY storage:`, memoryVotes);
     return;
   }
+  
+  console.log(`[${process.env.NODE_ENV?.toUpperCase()}] Updating DATABASE for event ${eventId} to ${newCount}`);
   
   try {
     await initTable();
@@ -95,6 +101,7 @@ export async function POST(request: NextRequest) {
       newCount = currentVotes - 1;
     }
     
+    console.log(`[VOTE] Event ${eventId}: ${currentVotes} → ${newCount} (${action})`);
     await updateVote(eventId, newCount);
     
     return NextResponse.json({ 
