@@ -88,23 +88,31 @@ export default function EventsPage() {
   const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
   const [voteCounts, setVoteCounts] = useState<Record<number, number>>({});
   const [userVotes, setUserVotes] = useState<Set<number>>(new Set());
+  const [isLoading, setIsLoading] = useState(true);
 
 
   // Load votes from API and localStorage on mount
   useEffect(() => {
-    // Fetch vote counts from API
-    fetch('/api/votes')
-      .then(res => res.json())
-      .then(data => {
+    async function loadVoteData() {
+      try {
+        // Fetch vote counts from API
+        const res = await fetch('/api/votes');
+        const data = await res.json();
         setVoteCounts(data);
-      })
-      .catch(err => console.error('Error fetching votes:', err));
-    
-    // Load user's votes from localStorage
-    const savedVotes = localStorage.getItem('mythenpark-votes');
-    if (savedVotes) {
-      setUserVotes(new Set(JSON.parse(savedVotes)));
+        
+        // Load user's votes from localStorage
+        const savedVotes = localStorage.getItem('mythenpark-votes');
+        if (savedVotes) {
+          setUserVotes(new Set(JSON.parse(savedVotes)));
+        }
+      } catch (err) {
+        console.error('Error fetching votes:', err);
+      } finally {
+        setIsLoading(false);
+      }
     }
+    
+    loadVoteData();
   }, []);
 
   // Filter events based on selected category
@@ -165,6 +173,18 @@ export default function EventsPage() {
       console.error('Error voting:', error);
     }
   };
+
+  // Show loading state while fetching vote data
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"></div>
+          <p className="text-xl text-gray-600 dark:text-gray-300">Loading events...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
