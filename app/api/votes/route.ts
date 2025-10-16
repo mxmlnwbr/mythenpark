@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { db, isDatabaseConfigured } from '@/db';
+import { eventVotes } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 import { sql } from '@vercel/postgres';
 
 // In-memory storage for local development (fallback when no DB)
 let memoryVotes: Record<number, number> = {};
 
-// Check if database is configured
-function isDatabaseConfigured(): boolean {
-  return !!process.env.POSTGRES_URL;
-}
-
-// Initialize database table
+// Initialize database table (create if not exists)
 async function initTable() {
   try {
     await sql`
@@ -32,10 +30,10 @@ async function readVotes(): Promise<Record<number, number>> {
   
   try {
     await initTable();
-    const { rows } = await sql`SELECT event_id, vote_count FROM event_votes`;
+    const allVotes = await db.select().from(eventVotes);
     const votes: Record<number, number> = {};
-    rows.forEach(row => {
-      votes[row.event_id] = row.vote_count;
+    allVotes.forEach(vote => {
+      votes[vote.eventId] = vote.voteCount;
     });
     return votes;
   } catch (error) {
@@ -54,12 +52,13 @@ async function updateVote(eventId: number, newCount: number) {
   
   try {
     await initTable();
-    await sql`
-      INSERT INTO event_votes (event_id, vote_count)
-      VALUES (${eventId}, ${newCount})
-      ON CONFLICT (event_id)
-      DO UPDATE SET vote_count = ${newCount}
-    `;
+    await db
+      .insert(eventVotes)
+      .values({ eventId, voteCount: newCount })
+      .onConflictDoUpdate({
+        target: eventVotes.eventId,
+        set: { voteCount: newCount },
+      });
   } catch (error) {
     console.error('Error updating vote:', error);
     throw error;
