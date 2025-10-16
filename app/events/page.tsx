@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react';
+import { ThumbsUp } from 'lucide-react';
 
 // Define event type
 type Event = {
@@ -11,6 +12,7 @@ type Event = {
   imageUrl: string;
   category: 'competition' | 'workshop' | 'special';
   featured: boolean;
+  votes?: number;
 };
 
 export default function EventsPage() {
@@ -84,7 +86,26 @@ export default function EventsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [filteredEvents, setFilteredEvents] = useState<Event[]>(events);
   const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
+  const [voteCounts, setVoteCounts] = useState<Record<number, number>>({});
+  const [userVotes, setUserVotes] = useState<Set<number>>(new Set());
 
+
+  // Load votes from API and localStorage on mount
+  useEffect(() => {
+    // Fetch vote counts from API
+    fetch('/api/votes')
+      .then(res => res.json())
+      .then(data => {
+        setVoteCounts(data);
+      })
+      .catch(err => console.error('Error fetching votes:', err));
+    
+    // Load user's votes from localStorage
+    const savedVotes = localStorage.getItem('mythenpark-votes');
+    if (savedVotes) {
+      setUserVotes(new Set(JSON.parse(savedVotes)));
+    }
+  }, []);
 
   // Filter events based on selected category
   useEffect(() => {
@@ -111,6 +132,39 @@ export default function EventsPage() {
 
 
   const featuredEvents = events.filter(event => event.featured);
+
+  // Handle vote/unvote
+  const handleVote = async (eventId: number) => {
+    const hasVoted = userVotes.has(eventId);
+    const action = hasVoted ? 'downvote' : 'upvote';
+    
+    try {
+      const response = await fetch('/api/votes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventId, action })
+      });
+      
+      const data = await response.json();
+      
+      // Update vote counts
+      setVoteCounts(prev => ({ ...prev, [eventId]: data.votes }));
+      
+      // Update user votes
+      const newUserVotes = new Set(userVotes);
+      if (hasVoted) {
+        newUserVotes.delete(eventId);
+      } else {
+        newUserVotes.add(eventId);
+      }
+      setUserVotes(newUserVotes);
+      
+      // Save to localStorage
+      localStorage.setItem('mythenpark-votes', JSON.stringify(Array.from(newUserVotes)));
+    } catch (error) {
+      console.error('Error voting:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -210,9 +264,25 @@ export default function EventsPage() {
                   <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{event.title}</h3>
                   <p className="text-blue-600 dark:text-blue-400 mb-4">{event.date}</p>
                   <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">{event.description}</p>
-                  <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-300 transform hover:scale-105">
-                    Learn More
-                  </button>
+                  
+                  {/* Vote Section */}
+                  <div className="flex items-center justify-between mt-4">
+                    <button 
+                      onClick={() => handleVote(event.id)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 ${
+                        userVotes.has(event.id)
+                          ? 'bg-blue-600 text-white shadow-lg'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      <ThumbsUp className={`w-4 h-4 ${userVotes.has(event.id) ? 'fill-current' : ''}`} />
+                      <span className="font-semibold">{voteCounts[event.id] || 0}</span>
+                      <span className="text-sm">{userVotes.has(event.id) ? 'Participating' : 'Participate'}</span>
+                    </button>
+                    <button className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-300">
+                      Learn More
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
