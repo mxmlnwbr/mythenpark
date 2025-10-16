@@ -54,33 +54,6 @@ export default function EventsPage() {
       imageUrl: "/Mythenpark-Logo.jpg",
       category: "special",
       featured: false
-    },
-    {
-      id: 5,
-      title: "Spring Jam Competition",
-      date: "March 20, 2026",
-      description: "Celebrate the end of winter season with our famous Spring Jam! Competitions, music, BBQ, and lots of fun in the spring snow.",
-      imageUrl: "/Mythenpark-Logo.jpg",
-      category: "competition",
-      featured: true
-    },
-    {
-      id: 6,
-      title: "Advanced Rail Techniques Workshop",
-      date: "January 10, 2026",
-      description: "Focus on perfecting your rail skills with this specialized workshop. Learn proper approach, balance, and exit techniques for various rail obstacles.",
-      imageUrl: "/Mythenpark-Logo.jpg",
-      category: "workshop",
-      featured: false
-    },
-    {
-      id: 7,
-      title: "Photography Day",
-      date: "February 25, 2026",
-      description: "Professional photographers will be on site to capture your best moments on the snow. Book a session and get amazing action shots of your skills!",
-      imageUrl: "/Mythenpark-Logo.jpg",
-      category: "special",
-      featured: false
     }
   ];
 
