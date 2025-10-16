@@ -1,40 +1,56 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { sql } from '@vercel/postgres';
 
-// Path to store votes data
-const votesFilePath = path.join(process.cwd(), 'data', 'votes.json');
-
-// Ensure data directory and file exist
-function ensureVotesFile() {
-  const dataDir = path.join(process.cwd(), 'data');
-  
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-  
-  if (!fs.existsSync(votesFilePath)) {
-    fs.writeFileSync(votesFilePath, JSON.stringify({}));
+// Initialize database table
+async function initTable() {
+  try {
+    await sql`
+      CREATE TABLE IF NOT EXISTS event_votes (
+        event_id INTEGER PRIMARY KEY,
+        vote_count INTEGER DEFAULT 0
+      )
+    `;
+  } catch (error) {
+    console.error('Error initializing table:', error);
   }
 }
 
-// Read votes from file
-function readVotes(): Record<number, number> {
-  ensureVotesFile();
-  const data = fs.readFileSync(votesFilePath, 'utf-8');
-  return JSON.parse(data);
+// Read all votes
+async function readVotes(): Promise<Record<number, number>> {
+  try {
+    await initTable();
+    const { rows } = await sql`SELECT event_id, vote_count FROM event_votes`;
+    const votes: Record<number, number> = {};
+    rows.forEach(row => {
+      votes[row.event_id] = row.vote_count;
+    });
+    return votes;
+  } catch (error) {
+    console.error('Error reading votes:', error);
+    return {};
+  }
 }
 
-// Write votes to file
-function writeVotes(votes: Record<number, number>) {
-  ensureVotesFile();
-  fs.writeFileSync(votesFilePath, JSON.stringify(votes, null, 2));
+// Update vote for a specific event
+async function updateVote(eventId: number, newCount: number) {
+  try {
+    await initTable();
+    await sql`
+      INSERT INTO event_votes (event_id, vote_count)
+      VALUES (${eventId}, ${newCount})
+      ON CONFLICT (event_id)
+      DO UPDATE SET vote_count = ${newCount}
+    `;
+  } catch (error) {
+    console.error('Error updating vote:', error);
+    throw error;
+  }
 }
 
 // GET: Retrieve all vote counts
 export async function GET() {
   try {
-    const votes = readVotes();
+    const votes = await readVotes();
     return NextResponse.json(votes);
   } catch (error) {
     console.error('Error reading votes:', error);
@@ -51,20 +67,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
     }
     
-    const votes = readVotes();
+    const votes = await readVotes();
     const currentVotes = votes[eventId] || 0;
     
+    let newCount = currentVotes;
     if (action === 'upvote') {
-      votes[eventId] = currentVotes + 1;
+      newCount = currentVotes + 1;
     } else if (action === 'downvote' && currentVotes > 0) {
-      votes[eventId] = currentVotes - 1;
+      newCount = currentVotes - 1;
     }
     
-    writeVotes(votes);
+    await updateVote(eventId, newCount);
     
     return NextResponse.json({ 
       eventId, 
-      votes: votes[eventId] 
+      votes: newCount
     });
   } catch (error) {
     console.error('Error updating votes:', error);
