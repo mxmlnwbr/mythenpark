@@ -62,7 +62,7 @@ export default function EventsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [syncingVotes, setSyncingVotes] = useState<Set<number>>(new Set()); // Track which events are syncing
 
   // Load votes from API and localStorage on mount
   useEffect(() => {
@@ -101,12 +101,37 @@ export default function EventsPage() {
     setTimeout(() => setSelectedEvent(null), 300);
   };
 
-  // Handle vote/unvote
+  // Handle vote/unvote with optimistic UI updates
   const handleVote = async (eventId: number, e?: React.MouseEvent) => {
     e?.stopPropagation(); // Prevent modal from opening when voting
     const hasVoted = userVotes.has(eventId);
     const action = hasVoted ? 'downvote' : 'upvote';
     
+    // Store previous state for rollback if API fails
+    const previousVoteCount = voteCounts[eventId] || 0;
+    const previousUserVotes = new Set(userVotes);
+    
+    // OPTIMISTIC UPDATE: Update UI immediately for instant feedback
+    const newUserVotes = new Set(userVotes);
+    const optimisticVoteCount = hasVoted 
+      ? Math.max(0, previousVoteCount - 1)
+      : previousVoteCount + 1;
+    
+    if (hasVoted) {
+      newUserVotes.delete(eventId);
+    } else {
+      newUserVotes.add(eventId);
+    }
+    
+    // Update UI instantly (before API call)
+    setVoteCounts(prev => ({ ...prev, [eventId]: optimisticVoteCount }));
+    setUserVotes(newUserVotes);
+    localStorage.setItem('mythenpark-votes', JSON.stringify(Array.from(newUserVotes)));
+    
+    // Mark as syncing
+    setSyncingVotes(prev => new Set([...prev, eventId]));
+    
+    // Update database in background
     try {
       const response = await fetch('/api/votes', {
         method: 'POST',
@@ -114,24 +139,38 @@ export default function EventsPage() {
         body: JSON.stringify({ eventId, action })
       });
       
+      if (!response.ok) {
+        throw new Error('Failed to update vote');
+      }
+      
       const data = await response.json();
       
-      // Update vote counts
+      // Sync with actual server response (in case of race conditions)
       setVoteCounts(prev => ({ ...prev, [eventId]: data.votes }));
       
-      // Update user votes
-      const newUserVotes = new Set(userVotes);
-      if (hasVoted) {
-        newUserVotes.delete(eventId);
-      } else {
-        newUserVotes.add(eventId);
-      }
-      setUserVotes(newUserVotes);
-      
-      // Save to localStorage
-      localStorage.setItem('mythenpark-votes', JSON.stringify(Array.from(newUserVotes)));
+      // Remove from syncing state
+      setSyncingVotes(prev => {
+        const next = new Set(prev);
+        next.delete(eventId);
+        return next;
+      });
     } catch (error) {
       console.error('Error voting:', error);
+      
+      // ROLLBACK: Revert to previous state on error
+      setVoteCounts(prev => ({ ...prev, [eventId]: previousVoteCount }));
+      setUserVotes(previousUserVotes);
+      localStorage.setItem('mythenpark-votes', JSON.stringify(Array.from(previousUserVotes)));
+      
+      // Remove from syncing state
+      setSyncingVotes(prev => {
+        const next = new Set(prev);
+        next.delete(eventId);
+        return next;
+      });
+      
+      // Optional: Show error toast/notification to user
+      alert('Failed to update vote. Please try again.');
     }
   };
 
@@ -285,13 +324,14 @@ export default function EventsPage() {
                 >
                   <motion.button 
                     onClick={(e) => handleVote(event.id, e)}
-                    className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                    disabled={syncingVotes.has(event.id)}
+                    className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 relative ${
                       userVotes.has(event.id)
                         ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    } ${syncingVotes.has(event.id) ? 'opacity-70 cursor-wait' : ''}`}
+                    whileHover={syncingVotes.has(event.id) ? {} : { scale: 1.05 }}
+                    whileTap={syncingVotes.has(event.id) ? {} : { scale: 0.95 }}
                   >
                     <ThumbsUp className={`w-5 h-5 ${
                       userVotes.has(event.id) ? 'fill-current' : ''
@@ -300,6 +340,15 @@ export default function EventsPage() {
                     <span className="text-sm">
                       {userVotes.has(event.id) ? 'Participating!' : 'Join Event'}
                     </span>
+                    {syncingVotes.has(event.id) && (
+                      <motion.span
+                        className="absolute right-3"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      >
+                        ⟳
+                      </motion.span>
+                    )}
                   </motion.button>
                 </motion.div>
               </div>
@@ -451,13 +500,14 @@ export default function EventsPage() {
                       e.stopPropagation();
                       handleVote(selectedEvent.id);
                     }}
-                    className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold text-lg transition-all duration-300 ${
+                    disabled={syncingVotes.has(selectedEvent.id)}
+                    className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold text-lg transition-all duration-300 relative ${
                       userVotes.has(selectedEvent.id)
                         ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    } ${syncingVotes.has(selectedEvent.id) ? 'opacity-70 cursor-wait' : ''}`}
+                    whileHover={syncingVotes.has(selectedEvent.id) ? {} : { scale: 1.02 }}
+                    whileTap={syncingVotes.has(selectedEvent.id) ? {} : { scale: 0.98 }}
                   >
                     <ThumbsUp className={`w-5 h-5 ${
                       userVotes.has(selectedEvent.id) ? 'fill-current' : ''
@@ -466,6 +516,15 @@ export default function EventsPage() {
                     <span className="text-sm">
                       {userVotes.has(selectedEvent.id) ? 'Participating!' : 'Join Event'}
                     </span>
+                    {syncingVotes.has(selectedEvent.id) && (
+                      <motion.span
+                        className="absolute right-4 text-xl"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      >
+                        ⟳
+                      </motion.span>
+                    )}
                   </motion.button>
                   <motion.button
                     onClick={closeModal}
