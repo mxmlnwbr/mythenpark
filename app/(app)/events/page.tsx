@@ -39,7 +39,9 @@ export default function EventsPage() {
         // Fetch events from API
         const eventsRes = await fetch('/api/events');
         const eventsData = await eventsRes.json();
-        setEvents(eventsData);
+        // Payload returns data in { docs: [...] } format
+        const events = eventsData.docs || eventsData;
+        setEvents(events);
         
         // Fetch vote counts from API
         const votesRes = await fetch('/api/votes');

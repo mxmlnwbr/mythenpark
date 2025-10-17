@@ -21,6 +21,7 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, Events],
+  serverURL: process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
