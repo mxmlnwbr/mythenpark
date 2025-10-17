@@ -11,7 +11,6 @@
     "db:migrate": "dotenv -e .env.local -- drizzle-kit migrate",
     "db:push": "dotenv -e .env.local -- drizzle-kit push",
     "db:studio": "dotenv -e .env.local -- drizzle-kit studio",
-    "db:init": "echo '1' | dotenv -e .env.local -- tsx scripts/init-db.ts",
     "db:reset": "dotenv -e .env.local -- tsx scripts/reset-db.ts",
     "seed:events": "dotenv -e .env.local -- tsx seed-events.ts"
   },
