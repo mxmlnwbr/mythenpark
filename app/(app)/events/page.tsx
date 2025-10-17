@@ -290,7 +290,7 @@ export default function EventsPage() {
               variants={cardVariants}
               whileHover={{ y: -10, transition: { duration: 0.3 } }}
               onClick={() => openModal(event)}
-              className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer"
+              className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer flex flex-col h-full"
             >
               {/* Featured Badge */}
               {event.featured && (
@@ -333,10 +333,10 @@ export default function EventsPage() {
               </div>
 
               {/* Content Section */}
-              <div className="p-6 space-y-4">
+              <div className="p-6 flex flex-col flex-1">
                 {/* Title */}
                 <motion.h3 
-                  className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300"
+                  className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300 min-h-[3.5rem] line-clamp-2"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: index * 0.1 + 0.4 }}
@@ -346,7 +346,7 @@ export default function EventsPage() {
                 
                 {/* Date */}
                 <motion.div 
-                  className="flex items-center gap-2 text-blue-600"
+                  className="flex items-center gap-2 text-blue-600 mt-2 mb-3"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 + 0.5 }}
@@ -357,7 +357,7 @@ export default function EventsPage() {
                 
                 {/* Description */}
                 <motion.p 
-                  className="text-gray-600 text-sm line-clamp-3 leading-relaxed"
+                  className="text-gray-600 text-sm line-clamp-3 leading-relaxed flex-1 mb-4 h-[4.5rem] overflow-hidden"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: index * 0.1 + 0.6 }}
@@ -367,6 +367,7 @@ export default function EventsPage() {
                 
                 {/* Vote Button */}
                 <motion.div
+                  className="mt-auto"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 + 0.7 }}
