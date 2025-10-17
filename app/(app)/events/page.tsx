@@ -17,46 +17,7 @@ type Event = {
 };
 
 export default function EventsPage() {
-  // Sample event data
-  const events: Event[] = [
-    {
-      id: 1,
-      title: "Winter Snowboard Championship",
-      date: "December 15, 2025",
-      description: "Join us for the annual snowboard championship with professional riders from all over Switzerland. Spectacular jumps, amazing tricks, and great atmosphere guaranteed!",
-      imageUrl: "/Mythenpark-Logo.jpg",
-      category: "competition",
-      featured: true
-    },
-    {
-      id: 2,
-      title: "Freestyle Workshop with Pro Riders",
-      date: "January 20, 2026",
-      description: "Learn from the best! Our pro riders will teach you advanced freestyle techniques, from basic jumps to complex aerial maneuvers. All skill levels welcome.",
-      imageUrl: "/Mythenpark-Logo.jpg",
-      category: "workshop",
-      featured: false
-    },
-    {
-      id: 3,
-      title: "Night Ride Special",
-      date: "February 5, 2026",
-      description: "Experience Mythenpark under the stars! Our special night ride event includes illuminated obstacles, hot drinks, and music. A magical winter experience you won't forget.",
-      imageUrl: "/Mythenpark-Logo.jpg",
-      category: "special",
-      featured: true
-    },
-    {
-      id: 4,
-      title: "Kids Snow Day",
-      date: "February 12, 2026",
-      description: "A fun day dedicated to our youngest snow enthusiasts! Child-friendly obstacles, games, and professional instructors to help kids improve their skills while having fun.",
-      imageUrl: "/Mythenpark-Logo.jpg",
-      category: "special",
-      featured: false
-    }
-  ];
-
+  const [events, setEvents] = useState<Event[]>([]);
   const [voteCounts, setVoteCounts] = useState<Record<number, number>>({});
   const [userVotes, setUserVotes] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
@@ -71,14 +32,19 @@ export default function EventsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
-  // Load votes from API and localStorage on mount
+  // Load events, votes from API and localStorage on mount
   useEffect(() => {
-    async function loadVoteData() {
+    async function loadData() {
       try {
+        // Fetch events from API
+        const eventsRes = await fetch('/api/events');
+        const eventsData = await eventsRes.json();
+        setEvents(eventsData);
+        
         // Fetch vote counts from API
-        const res = await fetch('/api/votes');
-        const data = await res.json();
-        setVoteCounts(data);
+        const votesRes = await fetch('/api/votes');
+        const votesData = await votesRes.json();
+        setVoteCounts(votesData);
         
         // Load user's votes from localStorage
         const savedVotes = localStorage.getItem('mythenpark-votes');
@@ -86,13 +52,13 @@ export default function EventsPage() {
           setUserVotes(new Set(JSON.parse(savedVotes)));
         }
       } catch (err) {
-        console.error('Error fetching votes:', err);
+        console.error('Error fetching data:', err);
       } finally {
         setIsLoading(false);
       }
     }
     
-    loadVoteData();
+    loadData();
   }, []);
 
 

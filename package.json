@@ -10,7 +10,8 @@
     "db:generate": "dotenv -e .env.local -- drizzle-kit generate",
     "db:migrate": "dotenv -e .env.local -- drizzle-kit migrate",
     "db:push": "dotenv -e .env.local -- drizzle-kit push",
-    "db:studio": "dotenv -e .env.local -- drizzle-kit studio"
+    "db:studio": "dotenv -e .env.local -- drizzle-kit studio",
+    "seed:events": "dotenv -e .env.local -- tsx seed-events.ts"
   },
   "dependencies": {
     "@payloadcms/db-vercel-postgres": "^3.60.0",
@@ -41,6 +42,7 @@
     "dotenv-cli": "^10.0.0",
     "drizzle-kit": "^0.31.5",
     "tailwindcss": "^4",
+    "tsx": "^4.20.6",
     "typescript": "^5"
   }
 }
