@@ -3,9 +3,21 @@ import { db, isDatabaseConfigured } from '@/db';
 import { eventVotes } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { sql } from '@vercel/postgres';
+import { getPayload } from 'payload';
+import config from '@/payload.config';
 
 // In-memory storage for local development (fallback when no DB)
 let memoryVotes: Record<number, number> = {};
+
+// Payload instance cache
+let payloadInstance: any = null;
+
+async function getPayloadInstance() {
+  if (!payloadInstance) {
+    payloadInstance = await getPayload({ config });
+  }
+  return payloadInstance;
+}
 
 // Initialize database table (create if not exists)
 async function initTable() {
@@ -21,52 +33,83 @@ async function initTable() {
   }
 }
 
-// Read all votes
+// Read all votes from Payload CMS
 async function readVotes(): Promise<Record<number, number>> {
-  // Use in-memory storage if no database configured (local dev)
-  if (!isDatabaseConfigured()) {
-    console.log(`[${process.env.NODE_ENV?.toUpperCase()}] Using IN-MEMORY storage. Votes:`, memoryVotes);
-    return memoryVotes;
-  }
-  
-  console.log(`[${process.env.NODE_ENV?.toUpperCase()}] Using DATABASE storage`);
-  
   try {
-    await initTable();
-    const allVotes = await db.select().from(eventVotes);
-    const votes: Record<number, number> = {};
-    allVotes.forEach(vote => {
-      votes[vote.eventId] = vote.voteCount;
+    const payload = await getPayloadInstance();
+    const statistics = await payload.find({
+      collection: 'event-statistics',
+      limit: 1000,
     });
+    
+    const votes: Record<number, number> = {};
+    statistics.docs.forEach((stat: any) => {
+      votes[stat.eventId] = stat.joinCount || 0;
+    });
+    
+    console.log(`[${process.env.NODE_ENV?.toUpperCase()}] Read ${statistics.docs.length} vote counts from Payload`);
     return votes;
   } catch (error) {
-    console.error('Error reading votes:', error);
+    console.error('Error reading votes from Payload:', error);
+    
+    // Fallback to in-memory if Payload fails
+    if (!isDatabaseConfigured()) {
+      console.log(`[${process.env.NODE_ENV?.toUpperCase()}] Fallback to IN-MEMORY storage. Votes:`, memoryVotes);
+      return memoryVotes;
+    }
+    
     return {};
   }
 }
 
-// Update vote for a specific event
-async function updateVote(eventId: number, newCount: number) {
-  // Use in-memory storage if no database configured (local dev)
-  if (!isDatabaseConfigured()) {
-    memoryVotes[eventId] = newCount;
-    console.log(`[${process.env.NODE_ENV?.toUpperCase()}] Updated IN-MEMORY storage:`, memoryVotes);
-    return;
-  }
-  
-  console.log(`[${process.env.NODE_ENV?.toUpperCase()}] Updating DATABASE for event ${eventId} to ${newCount}`);
-  
+// Update vote for a specific event in Payload CMS
+async function updateVote(eventId: number, newCount: number, eventTitle?: string) {
   try {
-    await initTable();
-    await db
-      .insert(eventVotes)
-      .values({ eventId, voteCount: newCount })
-      .onConflictDoUpdate({
-        target: eventVotes.eventId,
-        set: { voteCount: newCount },
+    const payload = await getPayloadInstance();
+    
+    // Check if statistics entry exists
+    const existing = await payload.find({
+      collection: 'event-statistics',
+      where: {
+        eventId: {
+          equals: eventId,
+        },
+      },
+    });
+    
+    if (existing.docs.length > 0) {
+      // Update existing entry
+      await payload.update({
+        collection: 'event-statistics',
+        id: existing.docs[0].id,
+        data: {
+          joinCount: newCount,
+          ...(eventTitle && { eventTitle }),
+        },
       });
+      console.log(`[${process.env.NODE_ENV?.toUpperCase()}] Updated Payload statistics for event ${eventId} to ${newCount}`);
+    } else {
+      // Create new entry
+      await payload.create({
+        collection: 'event-statistics',
+        data: {
+          eventId,
+          joinCount: newCount,
+          eventTitle: eventTitle || `Event ${eventId}`,
+        },
+      });
+      console.log(`[${process.env.NODE_ENV?.toUpperCase()}] Created Payload statistics for event ${eventId} with ${newCount}`);
+    }
   } catch (error) {
-    console.error('Error updating vote:', error);
+    console.error('Error updating vote in Payload:', error);
+    
+    // Fallback to in-memory storage if Payload fails
+    if (!isDatabaseConfigured()) {
+      memoryVotes[eventId] = newCount;
+      console.log(`[${process.env.NODE_ENV?.toUpperCase()}] Fallback: Updated IN-MEMORY storage:`, memoryVotes);
+      return;
+    }
+    
     throw error;
   }
 }
@@ -102,7 +145,21 @@ export async function POST(request: NextRequest) {
     }
     
     console.log(`[VOTE] Event ${eventId}: ${currentVotes} → ${newCount} (${action})`);
-    await updateVote(eventId, newCount);
+    
+    // Try to fetch event title for better admin experience
+    let eventTitle;
+    try {
+      const payload = await getPayloadInstance();
+      const event = await payload.findByID({
+        collection: 'events',
+        id: eventId.toString(),
+      });
+      eventTitle = event?.title;
+    } catch (e) {
+      // Event title is optional, continue without it
+    }
+    
+    await updateVote(eventId, newCount, eventTitle);
     
     return NextResponse.json({ 
       eventId, 

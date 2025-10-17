@@ -680,7 +680,7 @@ export default function EventsPage() {
                     <div className="text-5xl">✓</div>
                     <h3 className="text-xl font-bold text-green-800">Registration Successful!</h3>
                     <p className="text-green-700">
-                      You're all set for {selectedEvent.title}. Check your email for confirmation details.
+                      You're all set for {selectedEvent.title}. We look forward to seeing you there!
                     </p>
                     <button
                       onClick={() => {

@@ -42,33 +42,24 @@ const resetDatabase = async () => {
     process.env.PAYLOAD_ACCEPT_MIGRATIONS = 'true'
     
     const payload = await getPayload({ config })
-    console.log('   ✓ Payload tables created (Users, Media, Events, EventRegistrations)')
-    console.log('')
-
-    // Step 3: Push Drizzle schema for custom tables
-    console.log('🗄️  Step 3: Creating custom Drizzle tables...')
-    const db = drizzle(sql, { schema })
-    
-    // Create event_votes table (not managed by Payload)
-    await sql`
-      CREATE TABLE IF NOT EXISTS event_votes (
-        event_id INTEGER PRIMARY KEY,
-        vote_count INTEGER NOT NULL DEFAULT 0
-      )
-    `
-    console.log('   ✓ Created: event_votes')
+    console.log('   ✓ Payload tables created (Users, Media, Events, EventRegistrations, EventStatistics)')
     console.log('')
 
     console.log('✅ Database reset complete!')
     console.log('')
     console.log('📝 Your database now includes:')
-    console.log('   • Payload CMS collections (Users, Media, Events, EventRegistrations)')
-    console.log('   • Drizzle tables (event_votes)')
+    console.log('   • Payload CMS collections:')
+    console.log('     - Users (authentication)')
+    console.log('     - Media (file uploads)')
+    console.log('     - Events (event management)')
+    console.log('     - EventRegistrations (user sign-ups)')
+    console.log('     - EventStatistics (join counters - read-only)')
     console.log('')
     console.log('💡 Next steps:')
-    console.log('   1. Start dev server: pnpm dev')
-    console.log('   2. Visit /admin to manage event registrations')
-    console.log('   3. Optionally run: pnpm run seed:events')
+    console.log('   1. Start dev server: npm run dev')
+    console.log('   2. Visit /admin to create an admin user')
+    console.log('   3. Optionally run: npm run seed:events')
+    console.log('   4. Event statistics will populate automatically when users join events')
     
     process.exit(0)
   } catch (error) {
