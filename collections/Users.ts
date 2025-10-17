@@ -13,11 +13,6 @@ export const Users: CollectionConfig = {
     delete: ({ req: { user } }) => !!user,
   },
   fields: [
-    {
-      name: 'name',
-      type: 'text',
-      required: true,
-    },
     // Email added by default
     // Add more fields as needed
   ],
