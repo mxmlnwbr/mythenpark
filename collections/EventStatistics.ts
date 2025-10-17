@@ -6,15 +6,14 @@ export const EventStatistics: CollectionConfig = {
     useAsTitle: 'eventId',
     defaultColumns: ['eventId', 'eventTitle', 'joinCount', 'updatedAt'],
     group: 'Events',
-    description: 'View event participation statistics (read-only)',
+    description: 'View event participation statistics (automatically managed by API)',
   },
   access: {
     // Admins can read statistics
     read: ({ req: { user } }) => !!user,
-    // Allow API operations (create/update will be done by the API routes)
-    // Note: This allows creation/updates but the admin UI fields are read-only
-    create: () => true,
-    update: () => true,
+    // Block admin UI from creating/updating, but allow API (when req.user is undefined)
+    create: ({ req: { user } }) => !user, // Only API (no user context) can create
+    update: ({ req: { user } }) => !user, // Only API (no user context) can update
     delete: ({ req: { user } }) => !!user, // Only admins can delete
   },
   fields: [
