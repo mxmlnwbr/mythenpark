@@ -165,7 +165,7 @@ async function hasVoted(ipAddress: string, eventId: number): Promise<boolean> {
 }
 
 // Helper: Record a vote
-async function recordVote(ipAddress: string, eventId: number): Promise<void> {
+async function recordVote(ipAddress: string, eventId: number, eventTitle?: string): Promise<void> {
   try {
     const payload = await getPayloadInstance();
     await payload.create({
@@ -173,6 +173,7 @@ async function recordVote(ipAddress: string, eventId: number): Promise<void> {
       data: {
         ipAddress,
         eventId,
+        eventTitle: eventTitle || `Event ${eventId}`,
       },
     });
     console.log(`[VOTE] Recorded vote from IP ${ipAddress} for event ${eventId}`);
@@ -262,6 +263,19 @@ export async function POST(request: NextRequest) {
     const ipAddress = getClientIP(request);
     console.log(`[VOTE] Request from IP: ${ipAddress}`);
     
+    // Fetch event title first for recording
+    let eventTitle;
+    try {
+      const payload = await getPayloadInstance();
+      const event = await payload.findByID({
+        collection: 'events',
+        id: eventId.toString(),
+      });
+      eventTitle = event?.title;
+    } catch (e) {
+      // Event title is optional, continue without it
+    }
+    
     // Check if user has already voted
     const alreadyVoted = await hasVoted(ipAddress, eventId);
     
@@ -278,8 +292,8 @@ export async function POST(request: NextRequest) {
         );
       }
       
-      // Record the vote
-      await recordVote(ipAddress, eventId);
+      // Record the vote with event title
+      await recordVote(ipAddress, eventId, eventTitle);
     } else if (action === 'downvote') {
       if (!alreadyVoted) {
         return NextResponse.json(
@@ -304,19 +318,6 @@ export async function POST(request: NextRequest) {
     }
     
     console.log(`[VOTE] Event ${eventId}: ${currentVotes} → ${newCount} (${action})`);
-    
-    // Try to fetch event title for better admin experience
-    let eventTitle;
-    try {
-      const payload = await getPayloadInstance();
-      const event = await payload.findByID({
-        collection: 'events',
-        id: eventId.toString(),
-      });
-      eventTitle = event?.title;
-    } catch (e) {
-      // Event title is optional, continue without it
-    }
     
     await updateVote(eventId, newCount, eventTitle);
     

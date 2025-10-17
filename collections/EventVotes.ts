@@ -4,14 +4,14 @@ export const EventVotes: CollectionConfig = {
   slug: 'event-votes',
   admin: {
     useAsTitle: 'id',
-    defaultColumns: ['eventId', 'ipAddress', 'createdAt'],
+    defaultColumns: ['eventId', 'eventTitle', 'ipAddress', 'createdAt'],
     group: 'Events',
-    description: 'Track individual event votes by IP address',
-    hidden: true, // Hide from main menu
+    description: 'Track individual event votes by IP address (view-only)',
   },
   access: {
-    // Only API can interact with this collection
-    read: ({ req: { user } }) => !user,
+    // Admins can only view individual votes
+    read: ({ req: { user } }) => !!user,
+    // Only API can create/update/delete
     create: ({ req: { user } }) => !user,
     update: ({ req: { user } }) => !user,
     delete: ({ req: { user } }) => !user,
@@ -24,6 +24,15 @@ export const EventVotes: CollectionConfig = {
       index: true,
       admin: {
         description: 'Event ID that was voted for',
+        readOnly: true,
+      },
+    },
+    {
+      name: 'eventTitle',
+      type: 'text',
+      admin: {
+        description: 'Event title for reference',
+        readOnly: true,
       },
     },
     {
@@ -33,6 +42,7 @@ export const EventVotes: CollectionConfig = {
       index: true,
       admin: {
         description: 'IP address of the voter',
+        readOnly: true,
       },
     },
   ],
