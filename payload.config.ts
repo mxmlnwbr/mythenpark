@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Events } from './collections/Events'
+import { EventRegistrations } from './collections/EventRegistrations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -20,7 +21,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Events],
+  collections: [Users, Media, Events, EventRegistrations],
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

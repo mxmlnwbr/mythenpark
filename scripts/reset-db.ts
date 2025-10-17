@@ -42,14 +42,14 @@ const resetDatabase = async () => {
     process.env.PAYLOAD_ACCEPT_MIGRATIONS = 'true'
     
     const payload = await getPayload({ config })
-    console.log('   ✓ Payload tables created (Users, Media, Events)')
+    console.log('   ✓ Payload tables created (Users, Media, Events, EventRegistrations)')
     console.log('')
 
-    // Step 3: Push Drizzle schema
-    console.log('🗄️  Step 3: Pushing Drizzle schema...')
+    // Step 3: Push Drizzle schema for custom tables
+    console.log('🗄️  Step 3: Creating custom Drizzle tables...')
     const db = drizzle(sql, { schema })
     
-    // Create Drizzle tables directly from schema
+    // Create event_votes table (not managed by Payload)
     await sql`
       CREATE TABLE IF NOT EXISTS event_votes (
         event_id INTEGER PRIMARY KEY,
@@ -57,27 +57,18 @@ const resetDatabase = async () => {
       )
     `
     console.log('   ✓ Created: event_votes')
-
-    await sql`
-      CREATE TABLE IF NOT EXISTS event_registrations (
-        id SERIAL PRIMARY KEY,
-        event_id INTEGER NOT NULL,
-        first_name VARCHAR(100) NOT NULL,
-        last_name VARCHAR(100) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT NOW() NOT NULL
-      )
-    `
-    console.log('   ✓ Created: event_registrations')
     console.log('')
 
     console.log('✅ Database reset complete!')
     console.log('')
     console.log('📝 Your database now includes:')
-    console.log('   • Payload CMS collections (Users, Media, Events)')
-    console.log('   • Drizzle tables (event_votes, event_registrations)')
+    console.log('   • Payload CMS collections (Users, Media, Events, EventRegistrations)')
+    console.log('   • Drizzle tables (event_votes)')
     console.log('')
-    console.log('💡 Next step: Run `pnpm run seed:events` to populate events (optional)')
+    console.log('💡 Next steps:')
+    console.log('   1. Start dev server: pnpm dev')
+    console.log('   2. Visit /admin to manage event registrations')
+    console.log('   3. Optionally run: pnpm run seed:events')
     
     process.exit(0)
   } catch (error) {
