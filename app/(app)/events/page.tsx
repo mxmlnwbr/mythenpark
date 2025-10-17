@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ThumbsUp, Calendar, Sparkles, X, MapPin, Clock, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getDeviceId } from '@/lib/fingerprint';
 
 // Define event type
 type Event = {
@@ -46,7 +47,7 @@ export default function EventsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
-  // Load events, votes from API and localStorage on mount
+  // Load events and votes from API on mount
   useEffect(() => {
     async function loadData() {
       try {
@@ -57,12 +58,15 @@ export default function EventsPage() {
         const events = eventsData.docs || eventsData;
         setEvents(events);
         
-        // Fetch vote counts and user's voting status (IP-based)
-        const votesRes = await fetch('/api/votes');
+        // Get device ID for this browser/device
+        const deviceId = getDeviceId();
+        
+        // Fetch vote counts and user's voting status (device-based)
+        const votesRes = await fetch(`/api/votes?deviceId=${encodeURIComponent(deviceId)}`);
         const votesData = await votesRes.json();
         setVoteCounts(votesData.votes || votesData); // Support both old and new format
         
-        // Set user's votes from IP-based tracking
+        // Set user's votes from device-based tracking
         if (votesData.userVotes) {
           setUserVotes(new Set(votesData.userVotes));
         }
@@ -194,10 +198,13 @@ export default function EventsPage() {
     
     // Update database in background
     try {
+      // Get device ID for this browser/device
+      const deviceId = getDeviceId();
+      
       const response = await fetch('/api/votes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eventId, action })
+        body: JSON.stringify({ eventId, action, deviceId })
       });
       
       const data = await response.json();

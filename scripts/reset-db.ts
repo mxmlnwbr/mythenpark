@@ -54,13 +54,13 @@ const resetDatabase = async () => {
     console.log('     - Events (event management)')
     console.log('     - EventRegistrations (user sign-ups)')
     console.log('     - EventStatistics (join counters - read-only)')
-    console.log('     - EventVotes (IP-based vote tracking)')
+    console.log('     - EventVotes (device-based vote tracking)')
     console.log('')
     console.log('💡 Next steps:')
     console.log('   1. Start dev server: npm run dev')
     console.log('   2. Visit /admin to create an admin user')
     console.log('   3. Optionally run: npm run seed:events')
-    console.log('   4. Vote tracking uses IP addresses - each IP can vote once per event')
+    console.log('   4. Vote tracking uses device fingerprints - each device/browser can vote once per event')
     
     process.exit(0)
   } catch (error) {

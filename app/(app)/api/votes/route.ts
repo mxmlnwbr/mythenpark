@@ -114,28 +114,11 @@ async function updateVote(eventId: number, newCount: number, eventTitle?: string
   }
 }
 
-// Helper: Get client IP address
-function getClientIP(request: NextRequest): string {
-  // Check various headers for IP address
-  const forwardedFor = request.headers.get('x-forwarded-for');
-  const realIp = request.headers.get('x-real-ip');
-  const cfConnectingIp = request.headers.get('cf-connecting-ip');
-  
-  if (forwardedFor) {
-    return forwardedFor.split(',')[0].trim();
-  }
-  if (realIp) {
-    return realIp.trim();
-  }
-  if (cfConnectingIp) {
-    return cfConnectingIp.trim();
-  }
-  
-  return 'unknown';
-}
+// Note: deviceId is now sent from the client (browser fingerprint)
+// No need to extract IP address server-side
 
-// Helper: Check if IP has voted for an event
-async function hasVoted(ipAddress: string, eventId: number): Promise<boolean> {
+// Helper: Check if device has voted for an event
+async function hasVoted(deviceId: string, eventId: number): Promise<boolean> {
   try {
     const payload = await getPayloadInstance();
     const result = await payload.find({
@@ -143,8 +126,8 @@ async function hasVoted(ipAddress: string, eventId: number): Promise<boolean> {
       where: {
         and: [
           {
-            ipAddress: {
-              equals: ipAddress,
+            deviceId: {
+              equals: deviceId,
             },
           },
           {
@@ -165,18 +148,18 @@ async function hasVoted(ipAddress: string, eventId: number): Promise<boolean> {
 }
 
 // Helper: Record a vote
-async function recordVote(ipAddress: string, eventId: number, eventTitle?: string): Promise<void> {
+async function recordVote(deviceId: string, eventId: number, eventTitle?: string): Promise<void> {
   try {
     const payload = await getPayloadInstance();
     await payload.create({
       collection: 'event-votes',
       data: {
-        ipAddress,
+        deviceId,
         eventId,
         eventTitle: eventTitle || `Event ${eventId}`,
       },
     });
-    console.log(`[VOTE] Recorded vote from IP ${ipAddress} for event ${eventId}`);
+    console.log(`[VOTE] Recorded vote from device ${deviceId.substring(0, 10)}... for event ${eventId}`);
   } catch (error) {
     console.error('Error recording vote:', error);
     throw error;
@@ -184,7 +167,7 @@ async function recordVote(ipAddress: string, eventId: number, eventTitle?: strin
 }
 
 // Helper: Remove a vote record
-async function removeVote(ipAddress: string, eventId: number): Promise<void> {
+async function removeVote(deviceId: string, eventId: number): Promise<void> {
   try {
     const payload = await getPayloadInstance();
     const result = await payload.find({
@@ -192,8 +175,8 @@ async function removeVote(ipAddress: string, eventId: number): Promise<void> {
       where: {
         and: [
           {
-            ipAddress: {
-              equals: ipAddress,
+            deviceId: {
+              equals: deviceId,
             },
           },
           {
@@ -211,7 +194,7 @@ async function removeVote(ipAddress: string, eventId: number): Promise<void> {
         collection: 'event-votes',
         id: result.docs[0].id,
       });
-      console.log(`[VOTE] Removed vote from IP ${ipAddress} for event ${eventId}`);
+      console.log(`[VOTE] Removed vote from device ${deviceId.substring(0, 10)}... for event ${eventId}`);
     }
   } catch (error) {
     console.error('Error removing vote:', error);
@@ -224,15 +207,25 @@ export async function GET(request: NextRequest) {
   try {
     const votes = await readVotes();
     
-    // Get user's IP and check which events they've voted for
-    const ipAddress = getClientIP(request);
-    const payload = await getPayloadInstance();
+    // Get deviceId from query parameter
+    const { searchParams } = new URL(request.url);
+    const deviceId = searchParams.get('deviceId');
     
+    if (!deviceId) {
+      // Return just vote counts without user status
+      return NextResponse.json({
+        votes,
+        userVotes: [],
+      });
+    }
+    
+    // Check which events this device has voted for
+    const payload = await getPayloadInstance();
     const userVotes = await payload.find({
       collection: 'event-votes',
       where: {
-        ipAddress: {
-          equals: ipAddress,
+        deviceId: {
+          equals: deviceId,
         },
       },
       limit: 1000,
@@ -250,18 +243,20 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST: Update vote for an event (with IP tracking)
+// POST: Update vote for an event (with device tracking)
 export async function POST(request: NextRequest) {
   try {
-    const { eventId, action } = await request.json();
+    const { eventId, action, deviceId } = await request.json();
     
     if (!eventId || !action || !['upvote', 'downvote'].includes(action)) {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
     }
     
-    // Get user's IP address
-    const ipAddress = getClientIP(request);
-    console.log(`[VOTE] Request from IP: ${ipAddress}`);
+    if (!deviceId) {
+      return NextResponse.json({ error: 'Device ID is required' }, { status: 400 });
+    }
+    
+    console.log(`[VOTE] Request from device ${deviceId.substring(0, 10)}...`);
     
     // Fetch event title first for recording
     let eventTitle;
@@ -276,8 +271,8 @@ export async function POST(request: NextRequest) {
       // Event title is optional, continue without it
     }
     
-    // Check if user has already voted
-    const alreadyVoted = await hasVoted(ipAddress, eventId);
+    // Check if device has already voted
+    const alreadyVoted = await hasVoted(deviceId, eventId);
     
     // Handle upvote/downvote logic with IP tracking
     if (action === 'upvote') {
@@ -293,7 +288,7 @@ export async function POST(request: NextRequest) {
       }
       
       // Record the vote with event title
-      await recordVote(ipAddress, eventId, eventTitle);
+      await recordVote(deviceId, eventId, eventTitle);
     } else if (action === 'downvote') {
       if (!alreadyVoted) {
         return NextResponse.json(
@@ -303,7 +298,7 @@ export async function POST(request: NextRequest) {
       }
       
       // Remove the vote record
-      await removeVote(ipAddress, eventId);
+      await removeVote(deviceId, eventId);
     }
     
     // Update vote counts

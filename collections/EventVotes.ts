@@ -4,9 +4,9 @@ export const EventVotes: CollectionConfig = {
   slug: 'event-votes',
   admin: {
     useAsTitle: 'id',
-    defaultColumns: ['eventId', 'eventTitle', 'ipAddress', 'createdAt'],
+    defaultColumns: ['eventId', 'eventTitle', 'deviceId', 'createdAt'],
     group: 'Events',
-    description: 'Track individual event votes by IP address (view-only)',
+    description: 'Track individual event votes by device (view-only)',
   },
   access: {
     // Admins can only view individual votes
@@ -36,12 +36,12 @@ export const EventVotes: CollectionConfig = {
       },
     },
     {
-      name: 'ipAddress',
+      name: 'deviceId',
       type: 'text',
       required: true,
       index: true,
       admin: {
-        description: 'IP address of the voter',
+        description: 'Unique device identifier (browser fingerprint)',
         readOnly: true,
       },
     },
@@ -49,7 +49,7 @@ export const EventVotes: CollectionConfig = {
   timestamps: true,
   indexes: [
     {
-      fields: ['eventId', 'ipAddress'],
+      fields: ['eventId', 'deviceId'],
       unique: true,
     },
   ],
