@@ -16,6 +16,20 @@ type Event = {
   votes?: number;
 };
 
+// Format ISO date to readable format
+const formatDate = (dateString: string): string => {
+  try {
+    const date = new Date(dateString + 'T00:00:00Z');
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  } catch {
+    return dateString;
+  }
+};
+
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [voteCounts, setVoteCounts] = useState<Record<number, number>>({});
@@ -352,7 +366,7 @@ export default function EventsPage() {
                   transition={{ delay: index * 0.1 + 0.5 }}
                 >
                   <Calendar className="w-4 h-4" />
-                  <span className="text-sm font-medium">{event.date}</span>
+                  <span className="text-sm font-medium">{formatDate(event.date)}</span>
                 </motion.div>
                 
                 {/* Description */}
@@ -483,7 +497,7 @@ export default function EventsPage() {
                   </h2>
                   <div className="flex items-center gap-2 text-blue-600">
                     <Calendar className="w-5 h-5" />
-                    <span className="text-lg font-semibold">{selectedEvent.date}</span>
+                    <span className="text-lg font-semibold">{formatDate(selectedEvent.date)}</span>
                   </div>
                 </div>
 

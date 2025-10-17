@@ -9,7 +9,7 @@ const seedEvents = async () => {
   const events = [
     {
       title: 'Winter Snowboard Championship',
-      date: 'December 15, 2025',
+      date: '2025-12-15',
       description:
         'Join us for the annual snowboard championship with professional riders from all over Switzerland. Spectacular jumps, amazing tricks, and great atmosphere guaranteed!',
       imageUrl: '/Mythenpark-Logo.jpg',
@@ -18,7 +18,7 @@ const seedEvents = async () => {
     },
     {
       title: 'Freestyle Workshop with Pro Riders',
-      date: 'January 20, 2026',
+      date: '2026-01-20',
       description:
         'Learn from the best! Our pro riders will teach you advanced freestyle techniques, from basic jumps to complex aerial maneuvers. All skill levels welcome.',
       imageUrl: '/Mythenpark-Logo.jpg',
@@ -27,7 +27,7 @@ const seedEvents = async () => {
     },
     {
       title: 'Night Ride Special',
-      date: 'February 5, 2026',
+      date: '2026-02-05',
       description:
         'Experience Mythenpark under the stars! Our special night ride event includes illuminated obstacles, hot drinks, and music. A magical winter experience you won\'t forget.',
       imageUrl: '/Mythenpark-Logo.jpg',
@@ -36,7 +36,7 @@ const seedEvents = async () => {
     },
     {
       title: 'Kids Snow Day',
-      date: 'February 12, 2026',
+      date: '2026-02-12',
       description:
         'A fun day dedicated to our youngest snow enthusiasts! Child-friendly obstacles, games, and professional instructors to help kids improve their skills while having fun.',
       imageUrl: '/Mythenpark-Logo.jpg',

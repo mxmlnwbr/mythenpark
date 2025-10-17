@@ -21,12 +21,9 @@ export const Events: CollectionConfig = {
     },
     {
       name: 'date',
-      type: 'text',
+      type: 'date',
       required: true,
       label: 'Event Date',
-      admin: {
-        description: 'Format: Month Day, Year (e.g., December 15, 2025)',
-      },
     },
     {
       name: 'description',
