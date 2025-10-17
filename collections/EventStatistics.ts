@@ -9,12 +9,13 @@ export const EventStatistics: CollectionConfig = {
     description: 'View event participation statistics (automatically managed by API)',
   },
   access: {
-    // Admins can read statistics
+    // Admins can read and delete statistics
     read: ({ req: { user } }) => !!user,
-    // Block admin UI from creating/updating, but allow API (when req.user is undefined)
+    // Block admin UI from creating, but allow API
     create: ({ req: { user } }) => !user, // Only API (no user context) can create
-    update: ({ req: { user } }) => !user, // Only API (no user context) can update
-    delete: ({ req: { user } }) => !!user, // Only admins can delete
+    // Allow API to update, but make fields read-only in admin UI
+    update: () => true,
+    delete: ({ req: { user } }) => !!user, // Admins can delete
   },
   fields: [
     {
