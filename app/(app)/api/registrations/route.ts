@@ -1,36 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, isDatabaseConfigured } from '@/db';
-import { eventRegistrations } from '@/db/schema';
-import { sql } from '@vercel/postgres';
-import { eq } from 'drizzle-orm';
+import { getPayload } from 'payload';
+import config from '@/payload.config';
 
-// In-memory storage for local development
-let memoryRegistrations: Array<{
-  id: number;
-  eventId: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  createdAt: Date;
-}> = [];
-let nextId = 1;
+// Get Payload instance
+let payloadInstance: any = null;
 
-// Initialize database table
-async function initTable() {
-  try {
-    await sql`
-      CREATE TABLE IF NOT EXISTS event_registrations (
-        id SERIAL PRIMARY KEY,
-        event_id INTEGER NOT NULL,
-        first_name VARCHAR(100) NOT NULL,
-        last_name VARCHAR(100) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT NOW() NOT NULL
-      )
-    `;
-  } catch (error) {
-    console.error('Error initializing registrations table:', error);
+async function getPayloadInstance() {
+  if (!payloadInstance) {
+    payloadInstance = await getPayload({ config });
   }
+  return payloadInstance;
 }
 
 // Validate email format
@@ -81,46 +60,27 @@ export async function POST(request: NextRequest) {
     const trimmedLastName = lastName.trim();
     const trimmedEmail = email.trim().toLowerCase();
     
-    // Save registration
-    if (!isDatabaseConfigured()) {
-      // Use in-memory storage for dev
-      const registration = {
-        id: nextId++,
+    // Save registration using Payload CMS
+    const payload = await getPayloadInstance();
+    
+    const registration = await payload.create({
+      collection: 'event-registrations',
+      data: {
         eventId,
         firstName: trimmedFirstName,
         lastName: trimmedLastName,
         email: trimmedEmail,
-        createdAt: new Date(),
-      };
-      memoryRegistrations.push(registration);
-      console.log(`[${process.env.NODE_ENV?.toUpperCase()}] Registration saved to memory:`, registration);
-      
-      return NextResponse.json({
-        success: true,
-        registration: {
-          id: registration.id,
-          eventId: registration.eventId,
-        },
-      });
-    }
+      },
+    });
     
-    // Use database for production
-    console.log(`[${process.env.NODE_ENV?.toUpperCase()}] Saving registration to database`);
-    await initTable();
-    
-    const result = await db
-      .insert(eventRegistrations)
-      .values({
-        eventId,
-        firstName: trimmedFirstName,
-        lastName: trimmedLastName,
-        email: trimmedEmail,
-      })
-      .returning({ id: eventRegistrations.id, eventId: eventRegistrations.eventId });
+    console.log(`Registration saved via Payload CMS:`, registration.id);
     
     return NextResponse.json({
       success: true,
-      registration: result[0],
+      registration: {
+        id: registration.id,
+        eventId: registration.eventId,
+      },
     });
   } catch (error) {
     console.error('Error registering for event:', error);
@@ -141,22 +101,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Event ID required' }, { status: 400 });
     }
     
-    if (!isDatabaseConfigured()) {
-      const registrations = memoryRegistrations.filter(
-        (r) => r.eventId === parseInt(eventId)
-      );
-      return NextResponse.json({ count: registrations.length, registrations });
-    }
+    const payload = await getPayloadInstance();
     
-    await initTable();
-    const registrations = await db
-      .select()
-      .from(eventRegistrations)
-      .where(eq(eventRegistrations.eventId, parseInt(eventId)));
+    const result = await payload.find({
+      collection: 'event-registrations',
+      where: {
+        eventId: {
+          equals: parseInt(eventId),
+        },
+      },
+    });
     
     return NextResponse.json({
-      count: registrations.length,
-      registrations,
+      count: result.totalDocs,
+      registrations: result.docs,
     });
   } catch (error) {
     console.error('Error fetching registrations:', error);

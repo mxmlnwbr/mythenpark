@@ -6,6 +6,7 @@ export const EventRegistrations: CollectionConfig = {
     useAsTitle: 'email',
     defaultColumns: ['email', 'firstName', 'lastName', 'eventId', 'createdAt'],
     group: 'Events',
+    description: 'Manage event registrations and view who has signed up',
   },
   access: {
     read: () => true,
@@ -27,17 +28,26 @@ export const EventRegistrations: CollectionConfig = {
       type: 'text',
       required: true,
       maxLength: 100,
+      admin: {
+        description: 'First name of the registrant',
+      },
     },
     {
       name: 'lastName',
       type: 'text',
       required: true,
       maxLength: 100,
+      admin: {
+        description: 'Last name of the registrant',
+      },
     },
     {
       name: 'email',
       type: 'email',
       required: true,
+      admin: {
+        description: 'Email address of the registrant',
+      },
     },
   ],
   timestamps: true,
