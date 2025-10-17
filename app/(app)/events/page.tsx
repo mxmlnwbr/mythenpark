@@ -57,15 +57,14 @@ export default function EventsPage() {
         const events = eventsData.docs || eventsData;
         setEvents(events);
         
-        // Fetch vote counts from API
+        // Fetch vote counts and user's voting status (IP-based)
         const votesRes = await fetch('/api/votes');
         const votesData = await votesRes.json();
-        setVoteCounts(votesData);
+        setVoteCounts(votesData.votes || votesData); // Support both old and new format
         
-        // Load user's votes from localStorage
-        const savedVotes = localStorage.getItem('mythenpark-votes');
-        if (savedVotes) {
-          setUserVotes(new Set(JSON.parse(savedVotes)));
+        // Set user's votes from IP-based tracking
+        if (votesData.userVotes) {
+          setUserVotes(new Set(votesData.userVotes));
         }
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -189,7 +188,6 @@ export default function EventsPage() {
     // Update UI instantly (before API call)
     setVoteCounts(prev => ({ ...prev, [eventId]: optimisticVoteCount }));
     setUserVotes(newUserVotes);
-    localStorage.setItem('mythenpark-votes', JSON.stringify(Array.from(newUserVotes)));
     
     // Mark as syncing
     setSyncingVotes(prev => new Set([...prev, eventId]));
@@ -202,14 +200,28 @@ export default function EventsPage() {
         body: JSON.stringify({ eventId, action })
       });
       
-      if (!response.ok) {
-        throw new Error('Failed to update vote');
-      }
-      
       const data = await response.json();
       
-      // Sync with actual server response (in case of race conditions)
-      setVoteCounts(prev => ({ ...prev, [eventId]: data.votes }));
+      if (!response.ok) {
+        // Handle "already voted" error specifically
+        if (data.alreadyVoted) {
+          // User already voted, sync UI with server state
+          setUserVotes(prev => {
+            const next = new Set(prev);
+            next.add(eventId);
+            return next;
+          });
+          alert(data.message || "You're already participating in this event!");
+        } else {
+          throw new Error(data.message || 'Failed to update vote');
+        }
+        
+        // Rollback optimistic update
+        setVoteCounts(prev => ({ ...prev, [eventId]: previousVoteCount }));
+      } else {
+        // Success: Sync with actual server response
+        setVoteCounts(prev => ({ ...prev, [eventId]: data.votes }));
+      }
       
       // Remove from syncing state
       setSyncingVotes(prev => {
@@ -223,7 +235,6 @@ export default function EventsPage() {
       // ROLLBACK: Revert to previous state on error
       setVoteCounts(prev => ({ ...prev, [eventId]: previousVoteCount }));
       setUserVotes(previousUserVotes);
-      localStorage.setItem('mythenpark-votes', JSON.stringify(Array.from(previousUserVotes)));
       
       // Remove from syncing state
       setSyncingVotes(prev => {
@@ -232,7 +243,7 @@ export default function EventsPage() {
         return next;
       });
       
-      // Optional: Show error toast/notification to user
+      // Show error message to user
       alert('Failed to update vote. Please try again.');
     }
   };

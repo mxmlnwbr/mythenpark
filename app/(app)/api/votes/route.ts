@@ -114,18 +114,142 @@ async function updateVote(eventId: number, newCount: number, eventTitle?: string
   }
 }
 
-// GET: Retrieve all vote counts
-export async function GET() {
+// Helper: Get client IP address
+function getClientIP(request: NextRequest): string {
+  // Check various headers for IP address
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  const realIp = request.headers.get('x-real-ip');
+  const cfConnectingIp = request.headers.get('cf-connecting-ip');
+  
+  if (forwardedFor) {
+    return forwardedFor.split(',')[0].trim();
+  }
+  if (realIp) {
+    return realIp.trim();
+  }
+  if (cfConnectingIp) {
+    return cfConnectingIp.trim();
+  }
+  
+  return 'unknown';
+}
+
+// Helper: Check if IP has voted for an event
+async function hasVoted(ipAddress: string, eventId: number): Promise<boolean> {
+  try {
+    const payload = await getPayloadInstance();
+    const result = await payload.find({
+      collection: 'event-votes',
+      where: {
+        and: [
+          {
+            ipAddress: {
+              equals: ipAddress,
+            },
+          },
+          {
+            eventId: {
+              equals: eventId,
+            },
+          },
+        ],
+      },
+      limit: 1,
+    });
+    
+    return result.docs.length > 0;
+  } catch (error) {
+    console.error('Error checking vote status:', error);
+    return false;
+  }
+}
+
+// Helper: Record a vote
+async function recordVote(ipAddress: string, eventId: number): Promise<void> {
+  try {
+    const payload = await getPayloadInstance();
+    await payload.create({
+      collection: 'event-votes',
+      data: {
+        ipAddress,
+        eventId,
+      },
+    });
+    console.log(`[VOTE] Recorded vote from IP ${ipAddress} for event ${eventId}`);
+  } catch (error) {
+    console.error('Error recording vote:', error);
+    throw error;
+  }
+}
+
+// Helper: Remove a vote record
+async function removeVote(ipAddress: string, eventId: number): Promise<void> {
+  try {
+    const payload = await getPayloadInstance();
+    const result = await payload.find({
+      collection: 'event-votes',
+      where: {
+        and: [
+          {
+            ipAddress: {
+              equals: ipAddress,
+            },
+          },
+          {
+            eventId: {
+              equals: eventId,
+            },
+          },
+        ],
+      },
+      limit: 1,
+    });
+    
+    if (result.docs.length > 0) {
+      await payload.delete({
+        collection: 'event-votes',
+        id: result.docs[0].id,
+      });
+      console.log(`[VOTE] Removed vote from IP ${ipAddress} for event ${eventId}`);
+    }
+  } catch (error) {
+    console.error('Error removing vote:', error);
+    throw error;
+  }
+}
+
+// GET: Retrieve all vote counts and user's voting status
+export async function GET(request: NextRequest) {
   try {
     const votes = await readVotes();
-    return NextResponse.json(votes);
+    
+    // Get user's IP and check which events they've voted for
+    const ipAddress = getClientIP(request);
+    const payload = await getPayloadInstance();
+    
+    const userVotes = await payload.find({
+      collection: 'event-votes',
+      where: {
+        ipAddress: {
+          equals: ipAddress,
+        },
+      },
+      limit: 1000,
+    });
+    
+    const votedEventIds = userVotes.docs.map((vote: any) => vote.eventId);
+    
+    return NextResponse.json({
+      votes,
+      userVotes: votedEventIds,
+    });
   } catch (error) {
     console.error('Error reading votes:', error);
     return NextResponse.json({ error: 'Failed to read votes' }, { status: 500 });
   }
 }
 
-// POST: Update vote for an event
+// POST: Update vote for an event (with IP tracking)
 export async function POST(request: NextRequest) {
   try {
     const { eventId, action } = await request.json();
@@ -134,6 +258,41 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
     }
     
+    // Get user's IP address
+    const ipAddress = getClientIP(request);
+    console.log(`[VOTE] Request from IP: ${ipAddress}`);
+    
+    // Check if user has already voted
+    const alreadyVoted = await hasVoted(ipAddress, eventId);
+    
+    // Handle upvote/downvote logic with IP tracking
+    if (action === 'upvote') {
+      if (alreadyVoted) {
+        return NextResponse.json(
+          { 
+            error: 'Already participating', 
+            message: "You're already participating in this event!",
+            alreadyVoted: true,
+          },
+          { status: 400 }
+        );
+      }
+      
+      // Record the vote
+      await recordVote(ipAddress, eventId);
+    } else if (action === 'downvote') {
+      if (!alreadyVoted) {
+        return NextResponse.json(
+          { error: 'Not participating', message: "You haven't joined this event yet." },
+          { status: 400 }
+        );
+      }
+      
+      // Remove the vote record
+      await removeVote(ipAddress, eventId);
+    }
+    
+    // Update vote counts
     const votes = await readVotes();
     const currentVotes = votes[eventId] || 0;
     
@@ -163,7 +322,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ 
       eventId, 
-      votes: newCount
+      votes: newCount,
+      alreadyVoted: action === 'upvote',
     });
   } catch (error) {
     console.error('Error updating votes:', error);
