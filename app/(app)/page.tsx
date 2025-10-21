@@ -106,7 +106,7 @@ export default function Home() {
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
-      <div className="relative min-h-[calc(100vh-4rem)] w-full overflow-hidden bg-gradient-to-b from-blue-50 to-white">
+      <div className="relative min-h-[calc(100vh-4rem)] w-full overflow-hidden bg-gradient-to-b from-purple-100 via-blue-50 to-purple-50">
         {/* Animated background elements */}
         <div className="absolute inset-0 pointer-events-none">
           {snowflakes.map((flake) => (
@@ -170,8 +170,8 @@ export default function Home() {
             transition={{ delay: 0.8, duration: 0.5 }}
             className="text-center mb-10 lg:mb-16"
           >
-            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-800 mb-3 lg:mb-6">Welcome to Mythenpark</h1>
-            <p className="text-lg md:text-xl lg:text-2xl text-gray-600 max-w-md lg:max-w-2xl mx-auto">Experience the thrill of adventure in one of Switzerland's most beautiful mountain parks.</p>
+            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-magenta-600 mb-3 lg:mb-6">Welcome to Mythenpark</h1>
+            <p className="text-lg md:text-xl lg:text-2xl text-cyan-600 max-w-md lg:max-w-2xl mx-auto">Experience the thrill of adventure in one of Switzerland's most beautiful mountain parks.</p>
           </motion.div>
           
           {/* Stats Section */}
@@ -188,10 +188,10 @@ export default function Home() {
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 1.2 + index * 0.2, duration: 0.5 }}
-                  className="bg-white/80 backdrop-blur-sm rounded-xl p-6 lg:p-8 shadow-lg text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                  className="bg-white/90 backdrop-blur-sm rounded-xl p-6 lg:p-8 shadow-lg text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-purple-100"
                   whileHover={{ scale: 1.03 }}
                 >
-                  <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-blue-600 mb-2 lg:mb-4">
+                  <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-magenta-600 mb-2 lg:mb-4">
                     <CountUp end={stat.value} />
                   </div>
                   <div className="text-sm md:text-base lg:text-lg font-medium text-gray-700">{stat.label}</div>
@@ -208,7 +208,7 @@ export default function Home() {
           >
             <motion.a 
               href="/events" 
-              className="px-6 py-3 md:px-8 md:py-4 lg:text-lg bg-blue-600 text-white rounded-full font-semibold shadow-lg hover:bg-blue-700 transition-all duration-300"
+              className="px-6 py-3 md:px-8 md:py-4 lg:text-lg bg-gradient-to-r from-magenta-600 to-pink-600 text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -216,7 +216,7 @@ export default function Home() {
             </motion.a>
             <motion.a 
               href="/park-info" 
-              className="px-6 py-3 md:px-8 md:py-4 lg:text-lg bg-white text-gray-800 rounded-full font-semibold shadow-lg hover:bg-gray-100 transition-all duration-300 border border-gray-200"
+              className="px-6 py-3 md:px-8 md:py-4 lg:text-lg bg-cyan-50 text-cyan-600 rounded-full font-semibold shadow-lg hover:bg-cyan-100 transition-all duration-300 border-2 border-cyan-500"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >

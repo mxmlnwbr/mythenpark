@@ -262,7 +262,7 @@ export default function EventsPage() {
   // Show loading state while fetching vote data
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-16 px-4">
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-50 to-purple-50 py-16 px-4">
         <div className="container mx-auto max-w-7xl">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {Array.from({ length: 6 }).map((_, index) => (
@@ -325,7 +325,7 @@ export default function EventsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-16 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-50 to-purple-50 py-16 px-4">
       <div className="container mx-auto max-w-7xl">
         {/* Events Grid */}
         <motion.div 
@@ -386,7 +386,7 @@ export default function EventsPage() {
               <div className="p-6 flex flex-col flex-1">
                 {/* Title */}
                 <motion.h3 
-                  className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300 min-h-[3.5rem] line-clamp-2"
+                  className="text-xl font-bold text-gray-900 group-hover:text-magenta-600 transition-colors duration-300 min-h-[3.5rem] line-clamp-2"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: index * 0.1 + 0.4 }}
@@ -396,7 +396,7 @@ export default function EventsPage() {
                 
                 {/* Date */}
                 <motion.div 
-                  className="flex items-center gap-2 text-blue-600 mt-2 mb-3"
+                  className="flex items-center gap-2 text-cyan-500 mt-2 mb-3"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 + 0.5 }}
@@ -427,7 +427,7 @@ export default function EventsPage() {
                     disabled={syncingVotes.has(event.id)}
                     className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 relative ${
                       userVotes.has(event.id)
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50'
+                        ? 'bg-gradient-to-r from-magenta-600 to-pink-600 text-white shadow-lg shadow-magenta-500/50'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     } ${syncingVotes.has(event.id) ? 'opacity-70 cursor-wait' : ''}`}
                     whileHover={syncingVotes.has(event.id) ? {} : { scale: 1.05 }}
@@ -531,7 +531,7 @@ export default function EventsPage() {
                   <h2 className="text-3xl font-bold text-gray-900 mb-2">
                     {selectedEvent.title}
                   </h2>
-                  <div className="flex items-center gap-2 text-blue-600">
+                  <div className="flex items-center gap-2 text-cyan-500">
                     <Calendar className="w-5 h-5" />
                     <span className="text-lg font-semibold">{formatDate(selectedEvent.date)}</span>
                   </div>
@@ -539,23 +539,23 @@ export default function EventsPage() {
 
                 {/* Description */}
                 <div className="space-y-3">
-                  <h3 className="text-xl font-bold text-gray-900">About this Event</h3>
-                  <p className="text-gray-700 leading-relaxed">
+                  <h3 className="text-xl font-bold text-magenta-600">About this Event</h3>
+                  <p className="text-cyan-600 leading-relaxed">
                     {selectedEvent.description}
                   </p>
                 </div>
 
                 {/* Event Details Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
-                  <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl">
-                    <Clock className="w-6 h-6 text-blue-600" />
+                  <div className="flex items-center gap-3 p-4 bg-cyan-50 rounded-xl">
+                    <Clock className="w-6 h-6 text-cyan-500" />
                     <div>
                       <p className="text-xs text-gray-600 font-medium">Duration</p>
                       <p className="text-sm font-bold text-gray-900">Full Day</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-xl">
-                    <MapPin className="w-6 h-6 text-purple-600" />
+                  <div className="flex items-center gap-3 p-4 bg-magenta-50 rounded-xl">
+                    <MapPin className="w-6 h-6 text-magenta-600" />
                     <div>
                       <p className="text-xs text-gray-600 font-medium">Location</p>
                       <p className="text-sm font-bold text-gray-900">Mythenpark</p>
@@ -572,22 +572,22 @@ export default function EventsPage() {
 
                 {/* Additional Info */}
                 <div className="space-y-3">
-                  <h3 className="text-xl font-bold text-gray-900">What to Expect</h3>
+                  <h3 className="text-xl font-bold text-magenta-600">What to Expect</h3>
                   <ul className="space-y-2 text-gray-700">
                     <li className="flex items-start gap-2">
-                      <span className="text-blue-600 mt-1">✓</span>
+                      <span className="text-cyan-500 mt-1">✓</span>
                       <span>Professional instructors and guides</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-blue-600 mt-1">✓</span>
+                      <span className="text-cyan-500 mt-1">✓</span>
                       <span>All skill levels welcome</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-blue-600 mt-1">✓</span>
+                      <span className="text-cyan-500 mt-1">✓</span>
                       <span>Equipment rental available on-site</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-blue-600 mt-1">✓</span>
+                      <span className="text-cyan-500 mt-1">✓</span>
                       <span>Refreshments and breaks included</span>
                     </li>
                   </ul>
@@ -598,7 +598,7 @@ export default function EventsPage() {
                   <div className="pt-4">
                     <button
                       onClick={() => setShowRegistrationForm(true)}
-                      className="w-full px-6 py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-xl transition-colors"
+                      className="w-full px-6 py-3 bg-magenta-100 hover:bg-magenta-200 text-magenta-700 font-semibold rounded-xl transition-colors"
                     >
                       📝 Sign Up for this Event
                     </button>
@@ -686,7 +686,7 @@ export default function EventsPage() {
                         <motion.button
                           type="submit"
                           disabled={isSubmitting}
-                          className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                          className="flex-1 px-6 py-3 bg-gradient-to-r from-magenta-600 to-pink-600 text-white font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                           whileHover={!isSubmitting ? { scale: 1.02 } : {}}
                           whileTap={!isSubmitting ? { scale: 0.98 } : {}}
                         >
@@ -741,7 +741,7 @@ export default function EventsPage() {
                     disabled={syncingVotes.has(selectedEvent.id)}
                     className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold text-lg transition-all duration-300 relative ${
                       userVotes.has(selectedEvent.id)
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50'
+                        ? 'bg-gradient-to-r from-magenta-600 to-pink-600 text-white shadow-lg shadow-magenta-500/50'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     } ${syncingVotes.has(selectedEvent.id) ? 'opacity-70 cursor-wait' : ''}`}
                     whileHover={syncingVotes.has(selectedEvent.id) ? {} : { scale: 1.02 }}

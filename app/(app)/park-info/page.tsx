@@ -45,39 +45,39 @@ const AutoRefreshImage = ({ src, refreshTime = 60, caption, align = "center", cl
 
 export default function ParkInfo() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-50 to-purple-50">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <h1 className="text-4xl font-bold mb-6">PARK INFO</h1>
+        <h1 className="text-4xl font-bold mb-6 text-magenta-600">PARK INFO</h1>
 
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-2">Season Over</h2>
-          <p className="text-gray-700 dark:text-gray-300 mb-2">10. März 2025 </p>
-          <p className="mb-6">Jetzt wird güsled, g'hagged und de öpe eisch s'Veh uslah. Adé merci – mer wünsched en schöne Summer.</p>
+        <div className="mb-8 bg-white/80 backdrop-blur-sm rounded-lg p-6 border border-cyan-200">
+          <h2 className="text-2xl font-bold mb-2 text-magenta-600">Season Over</h2>
+          <p className="text-cyan-600 font-semibold mb-2">10. März 2025 </p>
+          <p className="mb-6 text-cyan-700">Jetzt wird güsled, g'hagged und de öpe eisch s'Veh uslah. Adé merci – mer wünsched en schöne Summer.</p>
         </div>
 
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-2">Lift-Flips:</h2>
-          <p className="mb-6">
+        <div className="mb-8 bg-white/80 backdrop-blur-sm rounded-lg p-6 border border-magenta-200">
+          <h2 className="text-2xl font-bold mb-2 text-magenta-600">Lift-Flips:</h2>
+          <p className="mb-6 text-cyan-700">
             Aufgrund mehreren defekten Liftbügel werden keine «Lift-Flips» oder andere Spielereien mehr am Lift toleriert. 
             Den Ersatz eines solchen Bügel ist kostenintensiv – bei nicht einhalten muss mit einem Ticketentzug gerechnet werden. 
             Dafür ist das Aussteigen beim Parkeingang nach wie vor erlaubt.
           </p>
         </div>
 
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-2">Falls geschlossen:</h2>
-          <p className="mb-6">
+        <div className="mb-8 bg-white/80 backdrop-blur-sm rounded-lg p-6 border border-cyan-200">
+          <h2 className="text-2xl font-bold mb-2 text-magenta-600">Falls geschlossen:</h2>
+          <p className="mb-6 text-cyan-700">
             Wenn der Park geschlossen ist, tolerieren wir keine Ausnahmen und verlangen, dass sich alle an die Absperrung halten. 
             Arbeiten mit dem Pistenbully bergen eine erhebliche Unfallgefahr. Geschlossen bedeutet betreten für alle verboten. 
             Danke fürs Verständnis.
           </p>
         </div>
 
-        <div className="mb-8">
-          <p className="font-semibold italic">Euer Mythenpark Team – In shape since 1998</p>
+        <div className="mb-8 bg-gradient-to-r from-magenta-50 to-cyan-50 rounded-lg p-6 border-2 border-magenta-200">
+          <p className="font-semibold italic text-magenta-600">Euer Mythenpark Team – In shape since 1998</p>
         </div>
 
-        <h2 className="text-2xl font-bold mb-4">Webcam</h2>
+        <h2 className="text-2xl font-bold mb-4 text-magenta-600">Webcam</h2>
         <div className="flex flex-col md:flex-row gap-6 mb-8 justify-center">
           
           <AutoRefreshImage 
@@ -98,7 +98,7 @@ export default function ParkInfo() {
         </div>
 
         <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-2">Standart Park Aufbau</h2>
+          <h2 className="text-2xl font-bold mb-2 text-magenta-600">Standart Park Aufbau</h2>
           <div className="flex justify-center mt-4">
             <img 
               src="/park.jpg" 

@@ -54,13 +54,13 @@ export default function Navbar() {
   }, [mobileMenuOpen]);
 
   return (
-    <div className="sticky top-0 left-0 right-0 z-50">
-      <header className="bg-white shadow-md dark:bg-gray-900">
+    <div className="sticky top-0 left-0 right-0 z-50" suppressHydrationWarning>
+      <header className="bg-white/95 backdrop-blur-sm shadow-lg border-b-2 border-magenta-200 dark:bg-gray-900" suppressHydrationWarning>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <Link href="/" className="flex-shrink-0 flex items-center">
-                <span className="text-xl font-bold">Mythenpark</span>
+                <span className="text-xl font-bold text-magenta-600">Mythenpark</span>
               </Link>
             </div>
             
@@ -143,19 +143,19 @@ export default function Navbar() {
           }`} 
           id="mobile-menu"
         >
-          <div className="bg-white dark:bg-gray-900 px-2 pt-2 pb-3 space-y-1 sm:px-3 shadow-lg">
+          <div className="bg-white/95 backdrop-blur-sm dark:bg-gray-900 px-2 pt-2 pb-3 space-y-1 sm:px-3 shadow-lg border-t border-magenta-200">
             {/* Using opacity and transform for smoother animation */}
             <div className={`transition-all duration-300 ease-in-out ${mobileMenuOpen ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform -translate-x-4'}`}>
-              <Link href="/" className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+              <Link href="/" className="text-cyan-600 hover:text-magenta-600 dark:text-cyan-400 dark:hover:text-magenta-400 block px-3 py-2 rounded-md text-base font-medium">
                 Home
               </Link>
-              <Link href="/park-info" className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+              <Link href="/park-info" className="text-cyan-600 hover:text-magenta-600 dark:text-cyan-400 dark:hover:text-magenta-400 block px-3 py-2 rounded-md text-base font-medium">
                 Park-Info
               </Link>
-              <Link href="/events" className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+              <Link href="/events" className="text-cyan-600 hover:text-magenta-600 dark:text-cyan-400 dark:hover:text-magenta-400 block px-3 py-2 rounded-md text-base font-medium">
                 Events
               </Link>
-              <Link href="/about" className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+              <Link href="/about" className="text-cyan-600 hover:text-magenta-600 dark:text-cyan-400 dark:hover:text-magenta-400 block px-3 py-2 rounded-md text-base font-medium">
                 About Us
               </Link>
             </div>
