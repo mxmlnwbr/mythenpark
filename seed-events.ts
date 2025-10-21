@@ -15,6 +15,14 @@ const seedEvents = async () => {
       imageUrl: '/Mythenpark-Logo.jpg',
       category: 'competition',
       featured: true,
+      duration: 'Full Day',
+      location: 'Mythenpark Main Slope',
+      whatToExpect: [
+        { item: 'Professional judges and timing system' },
+        { item: 'Live commentary and music' },
+        { item: 'Prize ceremony with awards' },
+        { item: 'Food and drink available' },
+      ],
     },
     {
       title: 'Freestyle Workshop with Pro Riders',
@@ -24,6 +32,14 @@ const seedEvents = async () => {
       imageUrl: '/Mythenpark-Logo.jpg',
       category: 'workshop',
       featured: false,
+      duration: 'Half Day (4 hours)',
+      location: 'Mythenpark Training Area',
+      whatToExpect: [
+        { item: 'Expert instruction from pro riders' },
+        { item: 'Small group sizes for personalized coaching' },
+        { item: 'Video analysis of your technique' },
+        { item: 'Safety equipment provided' },
+      ],
     },
     {
       title: 'Night Ride Special',
@@ -33,6 +49,14 @@ const seedEvents = async () => {
       imageUrl: '/Mythenpark-Logo.jpg',
       category: 'special',
       featured: true,
+      duration: 'Evening (3 hours)',
+      location: 'Mythenpark Full Course',
+      whatToExpect: [
+        { item: 'LED-illuminated obstacles and course' },
+        { item: 'DJ and music throughout' },
+        { item: 'Hot chocolate and mulled wine' },
+        { item: 'Special night riding atmosphere' },
+      ],
     },
     {
       title: 'Kids Snow Day',
@@ -42,22 +66,43 @@ const seedEvents = async () => {
       imageUrl: '/Mythenpark-Logo.jpg',
       category: 'special',
       featured: false,
+      duration: 'Full Day',
+      location: 'Mythenpark Kids Zone',
+      whatToExpect: [
+        { item: 'Age-appropriate obstacles and activities' },
+        { item: 'Certified children\'s instructors' },
+        { item: 'Fun games and competitions' },
+        { item: 'Snacks and refreshments for kids' },
+      ],
     },
   ]
 
   try {
-    // Check if events already exist
+    // Delete all existing events first
     const existingEvents = await payload.find({
       collection: 'events' as any,
-      limit: 1,
+      limit: 0, // Get all events
     })
 
     if (existingEvents.totalDocs > 0) {
-      console.log('Events already exist. Skipping seed.')
-      process.exit(0)
+      console.log(`Found ${existingEvents.totalDocs} existing events. Deleting...`)
+      
+      // Delete each existing event
+      for (const event of existingEvents.docs) {
+        await payload.delete({
+          collection: 'events' as any,
+          id: event.id,
+        })
+        console.log(`✗ Deleted event: ${event.title}`)
+      }
+      
+      console.log('✓ All existing events deleted.')
+    } else {
+      console.log('No existing events found.')
     }
 
-    // Create each event
+    // Create new events
+    console.log('Creating new events...')
     for (const event of events) {
       await payload.create({
         collection: 'events' as any,

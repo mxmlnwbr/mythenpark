@@ -16,6 +16,9 @@ type Event = {
   category: 'competition' | 'workshop' | 'special';
   featured: boolean;
   votes?: number;
+  duration?: string;
+  location?: string;
+  whatToExpect?: Array<{ item: string }>;
 };
 
 // Format ISO date to readable format
@@ -551,14 +554,14 @@ export default function EventsPage() {
                     <Clock className="w-6 h-6 text-cyan-500" />
                     <div>
                       <p className="text-xs text-gray-600 font-medium">Duration</p>
-                      <p className="text-sm font-bold text-gray-900">Full Day</p>
+                      <p className="text-sm font-bold text-gray-900">{selectedEvent.duration || 'Full Day'}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 p-4 bg-magenta-50 rounded-xl">
                     <MapPin className="w-6 h-6 text-magenta-600" />
                     <div>
                       <p className="text-xs text-gray-600 font-medium">Location</p>
-                      <p className="text-sm font-bold text-gray-900">Mythenpark</p>
+                      <p className="text-sm font-bold text-gray-900">{selectedEvent.location || 'Mythenpark'}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 p-4 bg-green-50 rounded-xl">
@@ -574,22 +577,33 @@ export default function EventsPage() {
                 <div className="space-y-3">
                   <h3 className="text-xl font-bold text-magenta-600">What to Expect</h3>
                   <ul className="space-y-2 text-gray-700">
-                    <li className="flex items-start gap-2">
-                      <span className="text-cyan-500 mt-1">✓</span>
-                      <span>Professional instructors and guides</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-cyan-500 mt-1">✓</span>
-                      <span>All skill levels welcome</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-cyan-500 mt-1">✓</span>
-                      <span>Equipment rental available on-site</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-cyan-500 mt-1">✓</span>
-                      <span>Refreshments and breaks included</span>
-                    </li>
+                    {selectedEvent.whatToExpect && selectedEvent.whatToExpect.length > 0 ? (
+                      selectedEvent.whatToExpect.map((item, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <span className="text-cyan-500 mt-1">✓</span>
+                          <span>{item.item}</span>
+                        </li>
+                      ))
+                    ) : (
+                      <>
+                        <li className="flex items-start gap-2">
+                          <span className="text-cyan-500 mt-1">✓</span>
+                          <span>Professional instructors and guides</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-cyan-500 mt-1">✓</span>
+                          <span>All skill levels welcome</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-cyan-500 mt-1">✓</span>
+                          <span>Equipment rental available on-site</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-cyan-500 mt-1">✓</span>
+                          <span>Refreshments and breaks included</span>
+                        </li>
+                      </>
+                    )}
                   </ul>
                 </div>
 

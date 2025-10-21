@@ -69,5 +69,47 @@ export const Events: CollectionConfig = {
         description: 'Mark this event as featured to highlight it',
       },
     },
+    {
+      name: 'duration',
+      type: 'text',
+      required: false,
+      label: 'Duration',
+      defaultValue: 'Full Day',
+      admin: {
+        description: 'How long the event lasts (e.g., "Full Day", "Half Day", "2 Hours")',
+      },
+    },
+    {
+      name: 'location',
+      type: 'text',
+      required: false,
+      label: 'Location',
+      defaultValue: 'Mythenpark',
+      admin: {
+        description: 'Where the event takes place',
+      },
+    },
+    {
+      name: 'whatToExpect',
+      type: 'array',
+      label: 'What to Expect',
+      admin: {
+        description: 'List of features/benefits participants can expect',
+      },
+      fields: [
+        {
+          name: 'item',
+          type: 'text',
+          required: true,
+          label: 'Item',
+        },
+      ],
+      defaultValue: [
+        { item: 'Professional instructors and guides' },
+        { item: 'All skill levels welcome' },
+        { item: 'Equipment rental available on-site' },
+        { item: 'Refreshments and breaks included' },
+      ],
+    },
   ],
 }
