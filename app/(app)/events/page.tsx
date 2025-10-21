@@ -21,7 +21,10 @@ type Event = {
 // Format ISO date to readable format
 const formatDate = (dateString: string): string => {
   try {
-    const date = new Date(dateString + 'T00:00:00Z');
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return dateString;
+    }
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
