@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { ThumbsUp, Calendar, Sparkles, X, MapPin, Clock, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getDeviceId } from '@/lib/fingerprint';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Define event type
 type Event = {
@@ -258,26 +259,40 @@ export default function EventsPage() {
   // Show loading state while fetching vote data
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <motion.div 
-          className="text-center"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <motion.div 
-            className="inline-block rounded-full h-20 w-20 border-4 border-blue-500 border-t-transparent mb-6"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          />
-          <motion.p 
-            className="text-xl text-gray-600"
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            Loading events...
-          </motion.p>
-        </motion.div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-16 px-4">
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="bg-white rounded-2xl overflow-hidden shadow-lg flex flex-col h-full">
+                {/* Image Skeleton */}
+                <Skeleton className="h-56 w-full" />
+                
+                {/* Content Skeleton */}
+                <div className="p-6 flex flex-col flex-1 space-y-4">
+                  {/* Title Skeleton */}
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  
+                  {/* Date Skeleton */}
+                  <div className="flex items-center gap-2 mt-2">
+                    <Skeleton className="h-4 w-4 rounded-full" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                  
+                  {/* Description Skeleton */}
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </div>
+                  
+                  {/* Button Skeleton */}
+                  <Skeleton className="h-12 w-full rounded-xl mt-auto" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
