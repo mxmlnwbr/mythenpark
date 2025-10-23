@@ -31,7 +31,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen grid grid-rows-[auto_1fr_auto]`}
       >
         <Navbar />
-        <main>
+        <main className="m-0 p-0">
           {children}
         </main>
         <Footer />

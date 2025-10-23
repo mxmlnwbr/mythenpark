@@ -61,6 +61,7 @@ export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
   const [pulseEffect, setPulseEffect] = useState(true);
   const [snowflakes, setSnowflakes] = useState<Snowflake[]>([]);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Check if device is mobile
   useEffect(() => {
@@ -106,7 +107,42 @@ export default function Home() {
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
-      <div className="relative min-h-[calc(100vh-4rem)] w-full overflow-hidden bg-gradient-to-b from-purple-100 via-blue-50 to-purple-50">
+      
+      {/* Video Hero Section */}
+      <div className="relative w-full h-screen overflow-hidden bg-black">
+        <iframe
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-0"
+          style={{
+            width: '100vw',
+            height: '56.25vw', // 16:9 aspect ratio
+            minHeight: '100vh',
+            minWidth: '177.77vh', // 16:9 aspect ratio
+          }}
+          src="https://www.youtube.com/embed/7bn2SISTcbY?autoplay=1&mute=1&loop=1&playlist=7bn2SISTcbY&controls=0&modestbranding=1"
+          title="Mythenpark Hero Video"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+        
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/30 pointer-events-none" />
+        
+        {/* Hero content overlay */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-center text-white px-4 z-10"
+          >
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-4 drop-shadow-lg">Mythenpark</h1>
+            <p className="text-lg md:text-xl lg:text-2xl drop-shadow-md max-w-2xl mx-auto">Experience the thrill of adventure in one of Switzerland's most beautiful mountain park</p>
+          </motion.div>
+        </div>
+      </div>
+      
+      {/* Main Content Section */}
+      <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-b from-purple-100 via-blue-50 to-purple-50">
         {/* Animated background elements */}
         <div className="absolute inset-0 pointer-events-none">
           {snowflakes.map((flake) => (
@@ -150,17 +186,8 @@ export default function Home() {
                 width={isMobile ? 250 : 300}
                 height={isMobile ? 250 : 300}
                 className="rounded-lg shadow-xl lg:w-[350px] lg:h-[350px]"
-                priority
                 sizes="(max-width: 768px) 250px, (max-width: 1024px) 300px, 350px"
               />
-            </motion.div>
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-              className="absolute -bottom-4 -right-4 bg-white/90 px-3 py-1 rounded-full shadow-lg text-sm md:text-base lg:text-lg font-semibold text-gray-800 lg:-bottom-5 lg:-right-5 lg:px-4 lg:py-2"
-            >
-              In shape since 1998
             </motion.div>
           </motion.div>
           
@@ -170,8 +197,8 @@ export default function Home() {
             transition={{ delay: 0.8, duration: 0.5 }}
             className="text-center mb-10 lg:mb-16"
           >
-            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-magenta-600 mb-3 lg:mb-6">Welcome to Mythenpark</h1>
-            <p className="text-lg md:text-xl lg:text-2xl text-cyan-600 max-w-md lg:max-w-2xl mx-auto">Experience the thrill of adventure in one of Switzerland's most beautiful mountain parks.</p>
+            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-magenta-600 mb-3 lg:mb-6">About Mythenpark</h1>
+            <p className="text-lg md:text-xl lg:text-2xl text-cyan-600 max-w-md lg:max-w-2xl mx-auto">Discover what makes us special - a mountain park dedicated to adventure and community.</p>
           </motion.div>
           
           {/* Stats Section */}
