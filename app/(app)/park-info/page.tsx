@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 // Define interface for component props
 interface AutoRefreshImageProps {
@@ -106,6 +107,23 @@ export default function ParkInfo() {
               className="rounded-lg shadow-md max-w-full h-auto"
             />
           </div>
+        </div>
+      </div>
+      
+      {/* In Shape Since 1998 Section */}
+      <div className="w-full bg-white py-16 lg:py-24 overflow-hidden mt-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <h2 className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-black text-[#e604ff] tracking-tight">
+              IN SHAPE SINCE 1998
+            </h2>
+          </motion.div>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 export default function AboutUs() {
   return (
@@ -47,6 +48,23 @@ export default function AboutUs() {
           <h2 className="text-2xl font-bold mb-2 text-magenta-600">Kontakt</h2>
           <p className="mb-1 text-gray-700"><strong>Mail:</strong></p>
           <p><a href="mailto:info@mythenpark.ch" className="text-cyan-600 hover:text-cyan-700 font-semibold">info@mythenpark.ch</a></p>
+        </div>
+      </div>
+      
+      {/* In Shape Since 1998 Section */}
+      <div className="w-full bg-white py-16 lg:py-24 overflow-hidden mt-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <h2 className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-black text-[#e604ff] tracking-tight">
+              IN SHAPE SINCE 1998
+            </h2>
+          </motion.div>
         </div>
       </div>
     </div>
