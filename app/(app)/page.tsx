@@ -118,7 +118,7 @@ export default function Home() {
             minHeight: '100vh',
             minWidth: '177.77vh', // 16:9 aspect ratio
           }}
-          src="https://www.youtube.com/embed/7bn2SISTcbY?autoplay=1&mute=1&loop=1&playlist=7bn2SISTcbY&controls=0&modestbranding=1"
+          src="https://www.youtube.com/embed/7bn2SISTcbY?autoplay=1&mute=1&loop=1&controls=0&modestbranding=1&end=270"
           title="Mythenpark Hero Video"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
@@ -137,6 +137,50 @@ export default function Home() {
           >
             <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-4 drop-shadow-lg">Mythenpark</h1>
             <p className="text-lg md:text-xl lg:text-2xl drop-shadow-md max-w-2xl mx-auto">Experience the thrill of adventure in one of Switzerland's most beautiful mountain park</p>
+          </motion.div>
+        </div>
+      </div>
+      
+      {/* Logo Section */}
+      <div className="w-full bg-gradient-to-b from-purple-50 to-purple-100 py-16 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="text-center mb-12 lg:mb-16"
+          >
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-magenta-600 mb-2">Our Partners</h2>
+            <p className="text-gray-600 text-sm md:text-base">Trusted by leading organizations</p>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-12 items-center justify-center"
+          >
+            {/* Logo placeholders - replace with actual logo images */}
+            <div className="flex items-center justify-center h-20 lg:h-24">
+              <div className="text-gray-400 text-sm font-semibold">Logo 1</div>
+            </div>
+            <div className="flex items-center justify-center h-20 lg:h-24">
+              <div className="text-gray-400 text-sm font-semibold">Logo 2</div>
+            </div>
+            <div className="flex items-center justify-center h-20 lg:h-24">
+              <div className="text-gray-400 text-sm font-semibold">Logo 3</div>
+            </div>
+            <div className="flex items-center justify-center h-20 lg:h-24">
+              <div className="text-gray-400 text-sm font-semibold">Logo 4</div>
+            </div>
+            <div className="flex items-center justify-center h-20 lg:h-24">
+              <div className="text-gray-400 text-sm font-semibold">Logo 5</div>
+            </div>
+            <div className="flex items-center justify-center h-20 lg:h-24">
+              <div className="text-gray-400 text-sm font-semibold">Logo 6</div>
+            </div>
           </motion.div>
         </div>
       </div>
