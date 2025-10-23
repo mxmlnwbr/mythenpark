@@ -107,7 +107,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchParkStatus() {
       try {
-        const response = await fetch('/api/park-status');
+        const response = await fetch('/api/public-park-status');
         const data = await response.json();
         setParkStatus(data);
       } catch (error) {
