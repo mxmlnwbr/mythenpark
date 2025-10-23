@@ -16,6 +16,16 @@ export async function GET() {
   try {
     const payload = await getPayload({ config });
     
+    console.log('GET /api/park-status called');
+    
+    // Fetch all park statuses first to debug
+    const allResult = await payload.find({
+      collection: 'park-status' as any,
+      limit: 10,
+    });
+    
+    console.log('All park statuses:', allResult.docs);
+    
     // Fetch the active park status
     const result = await payload.find({
       collection: 'park-status' as any,
@@ -28,8 +38,29 @@ export async function GET() {
       sort: '-updatedAt',
     });
 
+    console.log('Park status query result (active only):', result);
+
     if (result.docs.length === 0) {
-      // Return default closed status if no active status found
+      // If no active status, get the most recent one
+      console.log('No active park status found, getting most recent');
+      const recentResult = await payload.find({
+        collection: 'park-status' as any,
+        limit: 1,
+        sort: '-updatedAt',
+      });
+      
+      if (recentResult.docs.length > 0) {
+        const parkStatus = recentResult.docs[0] as ParkStatusType;
+        console.log('Returning most recent park status:', parkStatus);
+        return NextResponse.json({
+          status: parkStatus.status,
+          message: parkStatus.message || null,
+          updatedAt: parkStatus.updatedAt,
+        });
+      }
+      
+      // Return default closed status if no status found at all
+      console.log('No park statuses found, returning default closed');
       return NextResponse.json({
         status: 'closed',
         message: null,
@@ -38,6 +69,7 @@ export async function GET() {
     }
 
     const parkStatus = result.docs[0] as ParkStatusType;
+    console.log('Returning park status:', parkStatus);
     
     return NextResponse.json({
       status: parkStatus.status,
@@ -56,19 +88,54 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const payload = await getPayload({ config });
-    const body = await request.json();
+    
+    // Get the raw text
+    const text = await request.text();
+    let body: any = {};
+    
+    if (text && text.trim()) {
+      // Check if it's multipart form data
+      if (text.includes('Content-Disposition')) {
+        // Extract the _payload field from multipart form data
+        const payloadMatch = text.match(/name="_payload"\r?\n\r?\n([\s\S]*?)\r?\n--/);
+        if (payloadMatch && payloadMatch[1]) {
+          try {
+            body = JSON.parse(payloadMatch[1]);
+          } catch (e) {
+            console.error('Failed to parse _payload:', payloadMatch[1]);
+            return NextResponse.json(
+              { error: 'Invalid JSON in _payload field' },
+              { status: 400 }
+            );
+          }
+        }
+      } else {
+        // Try parsing as JSON
+        try {
+          body = JSON.parse(text);
+        } catch (e) {
+          console.error('Failed to parse JSON body:', text);
+          return NextResponse.json(
+            { error: 'Invalid JSON in request body' },
+            { status: 400 }
+          );
+        }
+      }
+    }
 
     // Create new park status
+    console.log('Creating park status with data:', body);
     const result = await payload.create({
       collection: 'park-status' as any,
       data: body,
     });
 
+    console.log('Park status created:', result);
     return NextResponse.json(result);
   } catch (error) {
     console.error('Error creating park status:', error);
     return NextResponse.json(
-      { error: 'Failed to create park status' },
+      { error: 'Failed to create park status', details: String(error) },
       { status: 500 }
     );
   }
@@ -77,7 +144,41 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const payload = await getPayload({ config });
-    const body = await request.json();
+    
+    // Get the raw text
+    const text = await request.text();
+    let body: any = {};
+    
+    if (text && text.trim()) {
+      // Check if it's multipart form data
+      if (text.includes('Content-Disposition')) {
+        // Extract the _payload field from multipart form data
+        const payloadMatch = text.match(/name="_payload"\r?\n\r?\n([\s\S]*?)\r?\n--/);
+        if (payloadMatch && payloadMatch[1]) {
+          try {
+            body = JSON.parse(payloadMatch[1]);
+          } catch (e) {
+            console.error('Failed to parse _payload:', payloadMatch[1]);
+            return NextResponse.json(
+              { error: 'Invalid JSON in _payload field' },
+              { status: 400 }
+            );
+          }
+        }
+      } else {
+        // Try parsing as JSON
+        try {
+          body = JSON.parse(text);
+        } catch (e) {
+          console.error('Failed to parse JSON body:', text);
+          return NextResponse.json(
+            { error: 'Invalid JSON in request body' },
+            { status: 400 }
+          );
+        }
+      }
+    }
+    
     const { id, ...data } = body;
 
     if (!id) {
@@ -88,17 +189,19 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update park status
+    console.log('Updating park status with id:', id, 'and data:', data);
     const result = await payload.update({
       collection: 'park-status' as any,
       id,
       data,
     });
 
+    console.log('Park status updated:', result);
     return NextResponse.json(result);
   } catch (error) {
     console.error('Error updating park status:', error);
     return NextResponse.json(
-      { error: 'Failed to update park status' },
+      { error: 'Failed to update park status', details: String(error) },
       { status: 500 }
     );
   }
