@@ -8,9 +8,36 @@ export const ParkStatus: CollectionConfig = {
   },
   access: {
     read: () => true, // Public read access
-    create: ({ req: { user } }) => !!user, // Only authenticated users can create
+    create: async ({ req }) => {
+      if (!req.user) return false;
+
+      const existing = await req.payload.find({
+        collection: "park-status",
+        limit: 1,
+      });
+
+      return existing.totalDocs === 0;
+    },
     update: ({ req: { user } }) => !!user, // Only authenticated users can update
     delete: ({ req: { user } }) => !!user, // Only authenticated users can delete
+  },
+  hooks: {
+    beforeChange: [
+      async ({ req, operation }) => {
+        if (operation !== "create") return;
+
+        const existing = await req.payload.find({
+          collection: "park-status",
+          limit: 1,
+        });
+
+        if (existing.totalDocs > 0) {
+          throw new Error(
+            "Only one park status entry is allowed. Edit the existing record instead."
+          );
+        }
+      },
+    ],
   },
   fields: [
     {
