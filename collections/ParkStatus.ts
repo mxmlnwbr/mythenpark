@@ -1,7 +1,9 @@
-import type { CollectionConfig } from "payload";
+import type { CollectionConfig, CollectionSlug } from "payload";
+
+const parkStatusSlug = "park-status" as CollectionSlug;
 
 export const ParkStatus: CollectionConfig = {
-  slug: "park-status",
+  slug: parkStatusSlug,
   admin: {
     useAsTitle: "status",
     defaultColumns: ["status", "updatedAt"],
@@ -12,7 +14,7 @@ export const ParkStatus: CollectionConfig = {
       if (!req.user) return false;
 
       const existing = await req.payload.find({
-        collection: "park-status",
+        collection: parkStatusSlug,
         limit: 1,
       });
 
@@ -27,7 +29,7 @@ export const ParkStatus: CollectionConfig = {
         if (operation !== "create") return;
 
         const existing = await req.payload.find({
-          collection: "park-status",
+          collection: parkStatusSlug,
           limit: 1,
         });
 
