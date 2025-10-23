@@ -8,13 +8,13 @@ export default function Footer() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="font-semibold text-lg mb-4 text-magenta-400">Mythenpark</h3>
+            <h3 className="font-bold text-lg mb-4 text-cyan-300">Mythenpark</h3>
             <p className="text-cyan-300">In shape since 1998</p>
             <p className="text-cyan-300 mt-2">Schwyz, Switzerland</p>
           </div>
           
           <div>
-            <h3 className="font-semibold text-lg mb-4 text-magenta-400">Quick Links</h3>
+            <h3 className="font-bold text-lg mb-4 text-cyan-300">Quick Links</h3>
             <ul className="space-y-2">
               <li><Link href="/" className="text-cyan-300 hover:text-magenta-400 font-medium">Home</Link></li>
               <li><Link href="/about" className="text-cyan-300 hover:text-magenta-400 font-medium">About</Link></li>
@@ -24,7 +24,7 @@ export default function Footer() {
           </div>
           
           <div>
-            <h3 className="font-semibold text-lg mb-4 text-magenta-400">Contact</h3>
+            <h3 className="font-bold text-lg mb-4 text-cyan-300">Contact</h3>
             <p className="text-cyan-300">Email: <a href="mailto:info@mythenpark.ch" className="text-magenta-400 hover:text-magenta-300 font-semibold">info@mythenpark.ch</a></p>
             <div className="flex space-x-4 mt-4">
               <a href="https://instagram.com/mythenpark" target="_blank" rel="noopener noreferrer" className="text-cyan-300 hover:text-magenta-400">
