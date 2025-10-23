@@ -12,6 +12,7 @@ import { Events } from './collections/Events'
 import { EventRegistrations } from './collections/EventRegistrations'
 import { EventStatistics } from './collections/EventStatistics'
 import { EventVotes } from './collections/EventVotes'
+import { ParkStatus } from './collections/ParkStatus'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -23,7 +24,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Events, EventRegistrations, EventStatistics, EventVotes],
+  collections: [Users, Media, Events, EventRegistrations, EventStatistics, EventVotes, ParkStatus],
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

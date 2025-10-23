@@ -61,6 +61,7 @@ export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
   const [pulseEffect, setPulseEffect] = useState(true);
   const [snowflakes, setSnowflakes] = useState<Snowflake[]>([]);
+  const [parkStatus, setParkStatus] = useState<{ status: 'open' | 'closed'; message?: string | null }>({ status: 'closed' });
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Check if device is mobile
@@ -102,6 +103,26 @@ export default function Home() {
     setSnowflakes(flakes);
   }, []);
 
+  // Fetch park status
+  useEffect(() => {
+    async function fetchParkStatus() {
+      try {
+        const response = await fetch('/api/park-status');
+        const data = await response.json();
+        setParkStatus(data);
+      } catch (error) {
+        console.error('Error fetching park status:', error);
+      }
+    }
+    
+    fetchParkStatus();
+    
+    // Refresh status every 5 minutes
+    const interval = setInterval(fetchParkStatus, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <>
       <Head>
@@ -129,6 +150,32 @@ export default function Home() {
         
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-black/30 pointer-events-none z-0" />
+        
+        {/* Park Status Badge - Top Right */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="absolute top-6 right-6 z-10"
+        >
+          <div className={`flex items-center gap-2 px-4 py-3 rounded-xl backdrop-blur-md shadow-lg border-2 ${
+            parkStatus.status === 'open' 
+              ? 'bg-green-500/90 border-green-300 text-white' 
+              : 'bg-red-500/90 border-red-300 text-white'
+          }`}>
+            <div className={`w-3 h-3 rounded-full ${
+              parkStatus.status === 'open' ? 'bg-white animate-pulse' : 'bg-white'
+            }`} />
+            <div className="flex flex-col">
+              <span className="font-bold text-sm md:text-base uppercase tracking-wide">
+                {parkStatus.status === 'open' ? 'Park Open' : 'Park Closed'}
+              </span>
+              {parkStatus.message && (
+                <span className="text-xs opacity-90">{parkStatus.message}</span>
+              )}
+            </div>
+          </div>
+        </motion.div>
       </div>
       
       {/* Logo Section */}
