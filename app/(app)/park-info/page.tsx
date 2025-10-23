@@ -46,7 +46,8 @@ const AutoRefreshImage = ({ src, refreshTime = 60, caption, align = "center", cl
 
 export default function ParkInfo() {
   return (
-    <div className="min-h-screen bg-[#e5e9fd]">
+    <>
+    <div className="min-h-screen bg-gradient-to-b from-[#e5e9fd] to-white">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <h1 className="text-4xl font-bold mb-6 text-magenta-600">PARK INFO</h1>
 
@@ -109,23 +110,23 @@ export default function ParkInfo() {
           </div>
         </div>
       </div>
-      
-      {/* In Shape Since 1998 Section */}
-      <div className="w-full bg-white py-16 lg:py-24 overflow-hidden mt-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center"
-          >
-            <h2 className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-black text-[#e604ff] tracking-tight">
-              IN SHAPE SINCE 1998
-            </h2>
-          </motion.div>
-        </div>
+    </div>
+    {/* In Shape Since 1998 Section */}
+    <div className="w-full bg-white py-16 lg:py-24 overflow-hidden mt-16">
+      <div className="max-w-7xl mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="text-center"
+        >
+          <h2 className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-black text-[#e604ff] tracking-tight">
+            IN SHAPE SINCE 1998
+          </h2>
+        </motion.div>
       </div>
     </div>
+    </>
   );
 }
