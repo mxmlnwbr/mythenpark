@@ -166,36 +166,53 @@ export default function Home() {
           transition={{ duration: 0.6, delay: 0.5 }}
           className="absolute top-6 right-6 z-10"
         >
-          <div
-            className={`flex items-center gap-2 px-4 py-3 rounded-xl backdrop-blur-md shadow-lg border-2 ${
-              parkStatus.status === "open"
-                ? "bg-green-500/90 border-green-300 text-white"
-                : "bg-red-500/90 border-red-300 text-white"
-            }`}
-          >
+          <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-[0_20px_35px_rgba(0,0,0,0.35)] px-5 py-4 min-w-[220px]">
             <div
-              className={`w-3 h-3 rounded-full ${
+              className={`absolute inset-0 opacity-70 ${
                 parkStatus.status === "open"
-                  ? "bg-white animate-pulse"
-                  : "bg-white"
+                  ? "bg-gradient-to-r from-emerald-400/80 via-emerald-500/70 to-emerald-600/70"
+                  : "bg-gradient-to-r from-rose-400/80 via-rose-500/70 to-rose-600/70"
               }`}
             />
-            <div className="flex flex-col">
-              <span className="font-bold text-sm md:text-base uppercase tracking-wide">
-                {parkStatus.status === "open" ? "Park Open" : "Park Closed"}
-              </span>
-              {parkStatus.message && (
-                <span className="text-xs opacity-90">{parkStatus.message}</span>
-              )}
-              {parkStatus.updatedAt && (
-                <span className="text-xs opacity-75">
-                  {`Updated ${new Intl.DateTimeFormat("en-GB", {
-                    timeZone: "Europe/Zurich",
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  }).format(new Date(parkStatus.updatedAt))}`}
+            <div className="relative flex items-start gap-3">
+              <div className="flex flex-col items-center">
+                <span
+                  className={`flex h-9 w-9 items-center justify-center rounded-full border border-white/40 text-sm font-semibold uppercase tracking-wide shadow-inner ${
+                    parkStatus.status === "open"
+                      ? "bg-white/20 text-white"
+                      : "bg-white/10 text-white"
+                  }`}
+                >
+                  {parkStatus.status === "open" ? "ON" : "OFF"}
                 </span>
-              )}
+                <div
+                  className={`mt-3 h-1.5 w-10 rounded-full ${
+                    parkStatus.status === "open" ? "bg-white animate-pulse" : "bg-white/70"
+                  }`}
+                />
+              </div>
+              <div className="flex flex-col text-white">
+                <span className="text-xs uppercase tracking-[0.25em] opacity-80">
+                  Park Status
+                </span>
+                <span className="text-lg font-bold leading-tight">
+                  {parkStatus.status === "open" ? "Park is Open" : "Park is Closed"}
+                </span>
+                {parkStatus.message && (
+                  <span className="mt-1 text-xs font-medium opacity-90">
+                    {parkStatus.message}
+                  </span>
+                )}
+                {parkStatus.updatedAt && (
+                  <span className="mt-2 text-[0.7rem] uppercase tracking-wide opacity-70">
+                    {`Updated ${new Intl.DateTimeFormat("en-GB", {
+                      timeZone: "Europe/Zurich",
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    }).format(new Date(parkStatus.updatedAt))} CET`}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </motion.div>
