@@ -110,35 +110,25 @@ export default function Home() {
       
       {/* Video Hero Section */}
       <div className="relative w-full h-screen overflow-hidden bg-black">
-        <iframe
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-0"
-          style={{
-            width: '100vw',
-            height: '56.25vw', // 16:9 aspect ratio
-            minHeight: '100vh',
-            minWidth: '177.77vh', // 16:9 aspect ratio
-          }}
-          src="https://www.youtube.com/embed/7bn2SISTcbY?autoplay=1&mute=1&loop=1&controls=0&modestbranding=1&end=270"
-          title="Mythenpark Hero Video"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
+        <div className="absolute inset-0 overflow-hidden">
+          <iframe
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-0"
+            style={{
+              width: '100vw',
+              height: '56.25vw', // 16:9 aspect ratio
+              minHeight: '100vh',
+              minWidth: '177.77vh', // 16:9 aspect ratio
+              pointerEvents: 'none',
+            }}
+            src="https://www.youtube.com/embed/7bn2SISTcbY?autoplay=1&mute=1&loop=1&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&end=270"
+            title="Mythenpark Hero Video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
         
         {/* Dark overlay */}
-        <div className="absolute inset-0 bg-black/30 pointer-events-none" />
-        
-        {/* Hero content overlay */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-center text-white px-4 z-10"
-          >
-            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-4 drop-shadow-lg">Mythenpark</h1>
-            <p className="text-lg md:text-xl lg:text-2xl drop-shadow-md max-w-2xl mx-auto">Experience the thrill of adventure in one of Switzerland's most beautiful mountain park</p>
-          </motion.div>
-        </div>
+        <div className="absolute inset-0 bg-black/30 pointer-events-none z-0" />
       </div>
       
       {/* Logo Section */}
