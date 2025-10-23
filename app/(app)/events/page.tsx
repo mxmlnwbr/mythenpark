@@ -265,7 +265,7 @@ export default function EventsPage() {
   // Show loading state while fetching vote data
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-50 to-purple-50 py-16 px-4">
+      <div className="min-h-screen bg-[#e5e9fd] py-16 px-4">
         <div className="container mx-auto max-w-7xl">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {Array.from({ length: 6 }).map((_, index) => (

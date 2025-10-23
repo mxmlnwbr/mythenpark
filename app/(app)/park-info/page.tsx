@@ -45,7 +45,7 @@ const AutoRefreshImage = ({ src, refreshTime = 60, caption, align = "center", cl
 
 export default function ParkInfo() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-50 to-purple-50">
+    <div className="min-h-screen bg-[#e5e9fd]">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <h1 className="text-4xl font-bold mb-6 text-magenta-600">PARK INFO</h1>
 
