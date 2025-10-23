@@ -329,7 +329,7 @@ export default function EventsPage() {
 
   return (
     <>
-    <div className="min-h-screen bg-[#e5e9fd] py-16 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-[#e5e9fd] to-white py-16 px-4">
       <div className="container mx-auto max-w-7xl">
         {/* Events Grid */}
         <motion.div 
