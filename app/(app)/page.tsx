@@ -132,7 +132,7 @@ export default function Home() {
       </div>
       
       {/* Logo Section */}
-      <div className="w-full bg-gradient-to-b from-purple-50 to-purple-100 py-16 lg:py-24">
+      <div className="w-full bg-gradient-to-b from-[#e5e9fd] to-[#e5e9fd] py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -176,7 +176,7 @@ export default function Home() {
       </div>
       
       {/* Main Content Section */}
-      <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-b from-purple-100 via-blue-50 to-purple-50">
+      <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-b from-[#e5e9fd] via-[#e5e9fd] to-white">
         {/* Animated background elements */}
         <div className="absolute inset-0 pointer-events-none">
           {snowflakes.map((flake) => (
