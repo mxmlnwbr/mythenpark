@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
@@ -27,32 +27,32 @@ const CountUp = ({ end, duration = 2 }: { end: number; duration?: number }) => {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  
+
   useEffect(() => {
     if (!isInView) return;
-    
+
     let startTime: number;
     let animationFrame: number;
-    
+
     const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
       const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
       setCount(Math.floor(progress * end));
-      
+
       if (progress < 1) {
         animationFrame = requestAnimationFrame(animate);
       }
     };
-    
+
     animationFrame = requestAnimationFrame(animate);
-    
+
     return () => {
       if (animationFrame) {
         cancelAnimationFrame(animationFrame);
       }
     };
   }, [end, duration, isInView]);
-  
+
   return <div ref={ref}>{count}</div>;
 };
 
@@ -61,7 +61,11 @@ export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
   const [pulseEffect, setPulseEffect] = useState(true);
   const [snowflakes, setSnowflakes] = useState<Snowflake[]>([]);
-  const [parkStatus, setParkStatus] = useState<{ status: 'open' | 'closed'; message?: string | null }>({ status: 'closed' });
+  const [parkStatus, setParkStatus] = useState<{
+    status: "open" | "closed";
+    message?: string | null;
+    updatedAt?: string | null;
+  }>({ status: "closed", message: null, updatedAt: null });
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Check if device is mobile
@@ -69,25 +73,25 @@ export default function Home() {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-    
+
     // Initial check
     checkIfMobile();
-    
+
     // Add event listener for window resize
-    window.addEventListener('resize', checkIfMobile);
-    
+    window.addEventListener("resize", checkIfMobile);
+
     // Clean up
-    return () => window.removeEventListener('resize', checkIfMobile);
+    return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
   // Set up pulse animation interval for mobile
   useEffect(() => {
     if (!isMobile) return;
-    
+
     const pulseInterval = setInterval(() => {
-      setPulseEffect(prev => !prev);
+      setPulseEffect((prev) => !prev);
     }, 2000);
-    
+
     return () => clearInterval(pulseInterval);
   }, [isMobile]);
 
@@ -107,19 +111,23 @@ export default function Home() {
   useEffect(() => {
     async function fetchParkStatus() {
       try {
-        const response = await fetch('/api/public-park-status');
+        const response = await fetch("/api/public-park-status");
         const data = await response.json();
-        setParkStatus(data);
+        setParkStatus({
+          status: data.status,
+          message: data.message ?? null,
+          updatedAt: data.updatedAt ?? null,
+        });
       } catch (error) {
-        console.error('Error fetching park status:', error);
+        console.error("Error fetching park status:", error);
       }
     }
-    
+
     fetchParkStatus();
-    
+
     // Refresh status every 5 minutes
     const interval = setInterval(fetchParkStatus, 5 * 60 * 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -128,18 +136,18 @@ export default function Home() {
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
-      
+
       {/* Video Hero Section */}
       <div className="relative w-full h-screen overflow-hidden bg-black">
         <div className="absolute inset-0 overflow-hidden">
           <iframe
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-0"
             style={{
-              width: '100vw',
-              height: '56.25vw', // 16:9 aspect ratio
-              minHeight: '100vh',
-              minWidth: '177.77vh', // 16:9 aspect ratio
-              pointerEvents: 'none',
+              width: "100vw",
+              height: "56.25vw", // 16:9 aspect ratio
+              minHeight: "100vh",
+              minWidth: "177.77vh", // 16:9 aspect ratio
+              pointerEvents: "none",
             }}
             src="https://www.youtube.com/embed/7bn2SISTcbY?autoplay=1&mute=1&loop=1&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&end=270"
             title="Mythenpark Hero Video"
@@ -147,10 +155,10 @@ export default function Home() {
             allowFullScreen
           />
         </div>
-        
+
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-black/30 pointer-events-none z-0" />
-        
+
         {/* Park Status Badge - Top Right */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
@@ -158,26 +166,41 @@ export default function Home() {
           transition={{ duration: 0.6, delay: 0.5 }}
           className="absolute top-6 right-6 z-10"
         >
-          <div className={`flex items-center gap-2 px-4 py-3 rounded-xl backdrop-blur-md shadow-lg border-2 ${
-            parkStatus.status === 'open' 
-              ? 'bg-green-500/90 border-green-300 text-white' 
-              : 'bg-red-500/90 border-red-300 text-white'
-          }`}>
-            <div className={`w-3 h-3 rounded-full ${
-              parkStatus.status === 'open' ? 'bg-white animate-pulse' : 'bg-white'
-            }`} />
+          <div
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl backdrop-blur-md shadow-lg border-2 ${
+              parkStatus.status === "open"
+                ? "bg-green-500/90 border-green-300 text-white"
+                : "bg-red-500/90 border-red-300 text-white"
+            }`}
+          >
+            <div
+              className={`w-3 h-3 rounded-full ${
+                parkStatus.status === "open"
+                  ? "bg-white animate-pulse"
+                  : "bg-white"
+              }`}
+            />
             <div className="flex flex-col">
               <span className="font-bold text-sm md:text-base uppercase tracking-wide">
-                {parkStatus.status === 'open' ? 'Park Open' : 'Park Closed'}
+                {parkStatus.status === "open" ? "Park Open" : "Park Closed"}
               </span>
               {parkStatus.message && (
                 <span className="text-xs opacity-90">{parkStatus.message}</span>
+              )}
+              {parkStatus.updatedAt && (
+                <span className="text-xs opacity-75">
+                  {`Updated ${new Intl.DateTimeFormat("en-GB", {
+                    timeZone: "Europe/Zurich",
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  }).format(new Date(parkStatus.updatedAt))}`}
+                </span>
               )}
             </div>
           </div>
         </motion.div>
       </div>
-      
+
       {/* Logo Section */}
       <div className="w-full bg-gradient-to-b from-[#e5e9fd] to-[#e5e9fd] py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -188,10 +211,14 @@ export default function Home() {
             viewport={{ once: true, margin: "-100px" }}
             className="text-center mb-12 lg:mb-16"
           >
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-magenta-600 mb-2">Our Partners</h2>
-            <p className="text-gray-600 text-sm md:text-base">Trusted by leading organizations</p>
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-magenta-600 mb-2">
+              Our Partners
+            </h2>
+            <p className="text-gray-600 text-sm md:text-base">
+              Trusted by leading organizations
+            </p>
           </motion.div>
-          
+
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -221,7 +248,7 @@ export default function Home() {
           </motion.div>
         </div>
       </div>
-      
+
       {/* Main Content Section */}
       <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-b from-[#e5e9fd] via-[#e5e9fd] to-white">
         {/* Animated background elements */}
@@ -234,31 +261,31 @@ export default function Home() {
                 width: `${flake.size}px`,
                 height: `${flake.size}px`,
                 left: flake.left,
-                top: '-20px',
+                top: "-20px",
                 animation: `snowfall ${flake.animationDuration} linear ${flake.animationDelay} infinite`,
-                boxShadow: '0 0 10px rgba(255, 255, 255, 0.8)',
+                boxShadow: "0 0 10px rgba(255, 255, 255, 0.8)",
               }}
             />
           ))}
         </div>
-        
+
         <div className="flex flex-col items-center justify-center py-12 px-4 md:py-16 lg:py-24 max-w-7xl mx-auto">
-          <motion.div 
+          <motion.div
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="relative mb-12 lg:mb-16"
           >
             <motion.div
-              animate={{ 
+              animate={{
                 rotate: [0, 2, 0, -2, 0],
-                scale: [1, 1.02, 1, 1.02, 1]
+                scale: [1, 1.02, 1, 1.02, 1],
               }}
-              transition={{ 
-                duration: 5, 
-                ease: "easeInOut", 
+              transition={{
+                duration: 5,
+                ease: "easeInOut",
                 repeat: Infinity,
-                repeatType: "reverse" 
+                repeatType: "reverse",
               }}
             >
               <Image
@@ -271,17 +298,22 @@ export default function Home() {
               />
             </motion.div>
           </motion.div>
-          
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
             className="text-center mb-10 lg:mb-16"
           >
-            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-magenta-600 mb-3 lg:mb-6">About Mythenpark</h1>
-            <p className="text-lg md:text-xl lg:text-2xl text-cyan-600 max-w-md lg:max-w-2xl mx-auto">Discover what makes us special - a mountain park dedicated to adventure and community.</p>
+            <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-magenta-600 mb-3 lg:mb-6">
+              About Mythenpark
+            </h1>
+            <p className="text-lg md:text-xl lg:text-2xl text-cyan-600 max-w-md lg:max-w-2xl mx-auto">
+              Discover what makes us special - a mountain park dedicated to
+              adventure and community.
+            </p>
           </motion.div>
-          
+
           {/* Stats Section */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -302,14 +334,16 @@ export default function Home() {
                   <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-magenta-600 mb-2 lg:mb-4">
                     <CountUp end={stat.value} />
                   </div>
-                  <div className="text-sm md:text-base lg:text-lg font-medium text-gray-700">{stat.label}</div>
+                  <div className="text-sm md:text-base lg:text-lg font-medium text-gray-700">
+                    {stat.label}
+                  </div>
                 </motion.div>
               ))}
             </div>
           </motion.div>
         </div>
       </div>
-      
+
       {/* In Shape Since 1998 Section */}
       <div className="w-full bg-white py-16 lg:py-24 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
@@ -326,7 +360,7 @@ export default function Home() {
           </motion.div>
         </div>
       </div>
-      
+
       <style jsx global>{`
         @keyframes snowfall {
           0% {
@@ -336,7 +370,7 @@ export default function Home() {
             transform: translateY(100vh) rotate(360deg);
           }
         }
-        
+
         @media (min-width: 1280px) {
           @keyframes snowfall {
             0% {
