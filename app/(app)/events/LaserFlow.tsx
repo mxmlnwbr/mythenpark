@@ -9,12 +9,14 @@ type LaserFlowProps = {
 };
 
 const parseHexToRgb = (hex: string) => {
-  const normalized = hex.trim().toLowerCase();
-  const regex = /^#?(?<r>[0-9a-f]{2})(?<g>[0-9a-f]{2})(?<b>[0-9a-f]{2})$/i;
-  const match = normalized.match(regex);
-  if (!match || !match.groups) return null;
-  const { r, g, b } = match.groups;
-  return `${parseInt(r, 16)}, ${parseInt(g, 16)}, ${parseInt(b, 16)}`;
+  const normalized = hex.trim().replace(/^#/, '');
+  if (!/^[0-9a-f]{6}$/i.test(normalized)) {
+    return null;
+  }
+  const r = parseInt(normalized.slice(0, 2), 16);
+  const g = parseInt(normalized.slice(2, 4), 16);
+  const b = parseInt(normalized.slice(4, 6), 16);
+  return `${r}, ${g}, ${b}`;
 };
 
 /**
