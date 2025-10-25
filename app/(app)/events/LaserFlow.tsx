@@ -42,7 +42,6 @@ const LaserFlow = ({
       <div className="laser-flow__beam-fog laser-flow__beam-fog--right" />
       <div className="laser-flow__base-core" />
       <div className="laser-flow__base-glow" />
-      <div className="laser-flow__base-grid" />
 
       <style jsx>{`
         .laser-flow {
@@ -133,30 +132,14 @@ const LaserFlow = ({
 
         .laser-flow__base-glow {
           position: absolute;
-          bottom: 20%;
+          bottom: 18%;
           left: 50%;
-          width: 90%;
-          height: 35%;
+          width: 80%;
+          height: 30%;
           transform: translateX(-50%);
-          background: radial-gradient(ellipse at center, rgba(var(--laser-color-rgb), 0.4), transparent 70%);
-          filter: blur(32px);
-          opacity: 0.6;
-        }
-
-        .laser-flow__base-grid {
-          position: absolute;
-          bottom: -5%;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 96%;
-          height: 38%;
-          border-radius: 28px;
-          border: 2px solid rgba(var(--laser-color-rgb), 0.2);
-          background:
-            radial-gradient(circle at 1px 1px, rgba(var(--laser-color-rgb), 0.18) 0.5px, transparent 0.5px) 0 0 / 14px 14px,
-            rgba(6, 0, 16, 0.85);
-          box-shadow: 0 0 40px rgba(var(--laser-color-rgb), 0.2);
-          overflow: hidden;
+          background: radial-gradient(ellipse at center, rgba(var(--laser-color-rgb), 0.45), transparent 70%);
+          filter: blur(28px);
+          opacity: 0.55;
         }
 
         @keyframes laser-flow-pulse {
