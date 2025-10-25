@@ -13,7 +13,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { getDeviceId } from "@/lib/fingerprint";
 import { Skeleton } from "@/components/ui/skeleton";
-import LaserFlow from "./LaserFlow";
+import LaserFlow from './LaserFlow';
 
 // Define event type
 type Event = {
@@ -354,13 +354,9 @@ export default function EventsPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative overflow-hidden rounded-3xl bg-[#060010] text-white px-6 py-16 md:px-12 md:py-24 shadow-2xl"
+              className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#050012] text-white px-6 py-16 md:px-12 md:py-24 shadow-2xl"
             >
-              <LaserFlow
-                color="#FF63D9"
-                horizontalBeamOffset={0.18}
-                verticalBeamOffset={0.68}
-              />
+              <LaserFlow color="#C58FFF" />
               <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
                 <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}

@@ -6,14 +6,6 @@ type LaserFlowProps = {
    * Primary accent color used across the beams.
    */
   color?: string;
-  /**
-   * Horizontal offset for the main beam (0 → left, 1 → right).
-   */
-  horizontalBeamOffset?: number;
-  /**
-   * Vertical offset for the secondary beam (0 → top, 1 → bottom).
-   */
-  verticalBeamOffset?: number;
 };
 
 const parseHexToRgb = (hex: string) => {
@@ -32,14 +24,10 @@ const parseHexToRgb = (hex: string) => {
 const LaserFlow = ({
   className,
   color = '#FF79C6',
-  horizontalBeamOffset = 0.25,
-  verticalBeamOffset = 0.6,
 }: LaserFlowProps) => {
   const rgbColor = parseHexToRgb(color) ?? '255, 121, 198';
   const style = {
     '--laser-color-rgb': rgbColor,
-    '--laser-horizontal-offset': `${horizontalBeamOffset * 100}%`,
-    '--laser-vertical-offset': `${verticalBeamOffset * 100}%`,
   } as CSSProperties;
 
   return (
@@ -47,11 +35,14 @@ const LaserFlow = ({
       className={`laser-flow absolute inset-0 pointer-events-none ${className ?? ''}`}
       style={style}
     >
-      <div className="laser-flow__gradient" />
-      <div className="laser-flow__beam laser-flow__beam--primary" />
-      <div className="laser-flow__beam laser-flow__beam--secondary" />
-      <div className="laser-flow__sparkle laser-flow__sparkle--one" />
-      <div className="laser-flow__sparkle laser-flow__sparkle--two" />
+      <div className="laser-flow__backdrop" />
+      <div className="laser-flow__beam-core" />
+      <div className="laser-flow__beam-glow" />
+      <div className="laser-flow__beam-fog laser-flow__beam-fog--left" />
+      <div className="laser-flow__beam-fog laser-flow__beam-fog--right" />
+      <div className="laser-flow__base-core" />
+      <div className="laser-flow__base-glow" />
+      <div className="laser-flow__base-grid" />
 
       <style jsx>{`
         .laser-flow {
@@ -59,141 +50,146 @@ const LaserFlow = ({
           --laser-horizontal-offset: 25%;
           --laser-vertical-offset: 60%;
           overflow: hidden;
-          filter: hue-rotate(0deg);
-          animation: laser-flow-hue 14s linear infinite;
+          background: radial-gradient(circle at 50% 120%, rgba(var(--laser-color-rgb), 0.08), transparent 60%),
+            radial-gradient(circle at 20% 10%, rgba(var(--laser-color-rgb), 0.04), transparent 45%),
+            radial-gradient(circle at 80% 5%, rgba(var(--laser-color-rgb), 0.05), transparent 45%),
+            linear-gradient(180deg, rgba(0, 0, 0, 0.95), rgba(12, 0, 24, 0.9));
+          filter: saturate(120%);
         }
 
-        .laser-flow__gradient {
+        .laser-flow__backdrop {
           position: absolute;
-          inset: -20%;
-          background: radial-gradient(circle at center, rgba(255, 255, 255, 0.35), transparent 55%),
-            conic-gradient(from 180deg, rgba(var(--laser-color-rgb), 0.18), transparent 70%);
-          animation: laser-flow-pulse 10s ease-in-out infinite;
+          inset: 0;
+          background: radial-gradient(circle at center, rgba(var(--laser-color-rgb), 0.18), transparent 60%);
+          opacity: 0.3;
           mix-blend-mode: screen;
         }
 
-        .laser-flow__beam {
+        .laser-flow__beam-core,
+        .laser-flow__beam-glow {
           position: absolute;
-          width: 160%;
-          height: 30%;
+          top: -10%;
+          bottom: 35%;
+          left: 50%;
+          transform: translateX(-50%);
+          border-radius: 999px;
+        }
+
+        .laser-flow__beam-core {
+          width: 7%;
           background: linear-gradient(
-            90deg,
-            transparent 0%,
-            rgba(var(--laser-color-rgb), 0.45) 25%,
-            rgba(var(--laser-color-rgb), 0.85) 50%,
-            rgba(var(--laser-color-rgb), 0.45) 75%,
-            transparent 100%
+            180deg,
+            rgba(255, 255, 255, 0.8),
+            rgba(var(--laser-color-rgb), 0.8) 45%,
+            rgba(var(--laser-color-rgb), 0.15)
           );
-          filter: blur(14px);
-          opacity: 0.8;
-          transform-origin: left center;
-          mix-blend-mode: screen;
+          box-shadow: 0 0 40px rgba(var(--laser-color-rgb), 0.45), 0 0 120px rgba(var(--laser-color-rgb), 0.4);
+          filter: blur(2px);
+          animation: laser-flow-pulse 4s ease-in-out infinite;
         }
 
-        .laser-flow__beam--primary {
-          top: var(--laser-vertical-offset);
-          left: -20%;
-          transform: rotate(-8deg) translateY(-50%);
-          animation: laser-flow-sweep 8s ease-in-out infinite alternate;
+        .laser-flow__beam-glow {
+          width: 18%;
+          background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.8), rgba(var(--laser-color-rgb), 0.6) 35%, transparent 75%);
+          filter: blur(16px);
+          opacity: 0.85;
+          animation: laser-flow-glimmer 6s ease-in-out infinite alternate;
         }
 
-        .laser-flow__beam--secondary {
-          top: 20%;
-          left: var(--laser-horizontal-offset);
-          transform: rotate(6deg) translate(-50%, -50%);
-          background: linear-gradient(
-            90deg,
-            transparent 0%,
-            rgba(var(--laser-color-rgb), 0.35) 20%,
-            rgba(var(--laser-color-rgb), 0.75) 50%,
-            rgba(var(--laser-color-rgb), 0.35) 80%,
-            transparent 100%
-          );
-          animation: laser-flow-sweep-secondary 12s ease-in-out infinite alternate;
-        }
-
-        .laser-flow__sparkle {
+        .laser-flow__beam-fog {
           position: absolute;
-          width: 140%;
-          height: 140%;
-          background: radial-gradient(
-            circle at center,
-            rgba(255, 255, 255, 0.75) 0%,
-            rgba(var(--laser-color-rgb), 0.4) 30%,
-            transparent 60%
-          );
-          mix-blend-mode: screen;
-          filter: blur(20px);
+          bottom: 35%;
+          width: 60%;
+          height: 40%;
+          background: radial-gradient(circle at 50% 100%, rgba(var(--laser-color-rgb), 0.35), transparent 70%);
+          filter: blur(30px);
           opacity: 0.45;
+          mix-blend-mode: screen;
+          animation: laser-flow-fog 8s ease-in-out infinite alternate;
         }
 
-        .laser-flow__sparkle--one {
-          top: -20%;
-          left: -30%;
-          animation: laser-flow-glimmer 9s ease-in-out infinite alternate;
+        .laser-flow__beam-fog--left {
+          left: -10%;
+          transform: rotate(-4deg);
         }
 
-        .laser-flow__sparkle--two {
-          bottom: -35%;
+        .laser-flow__beam-fog--right {
           right: -10%;
-          animation: laser-flow-glimmer 7.5s ease-in-out infinite alternate;
+          transform: rotate(4deg);
+          animation-delay: 1.8s;
         }
 
-        @keyframes laser-flow-hue {
-          0% {
-            filter: hue-rotate(0deg);
-          }
-          50% {
-            filter: hue-rotate(20deg);
-          }
-          100% {
-            filter: hue-rotate(0deg);
-          }
+        .laser-flow__base-core {
+          position: absolute;
+          bottom: 22%;
+          left: 50%;
+          width: 70%;
+          height: 26%;
+          transform: translateX(-50%);
+          background: radial-gradient(ellipse at 50% 70%, rgba(255, 255, 255, 0.8), rgba(var(--laser-color-rgb), 0.75) 35%, transparent 75%);
+          filter: blur(18px);
+          opacity: 0.9;
+        }
+
+        .laser-flow__base-glow {
+          position: absolute;
+          bottom: 20%;
+          left: 50%;
+          width: 90%;
+          height: 35%;
+          transform: translateX(-50%);
+          background: radial-gradient(ellipse at center, rgba(var(--laser-color-rgb), 0.4), transparent 70%);
+          filter: blur(32px);
+          opacity: 0.6;
+        }
+
+        .laser-flow__base-grid {
+          position: absolute;
+          bottom: -5%;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 96%;
+          height: 38%;
+          border-radius: 28px;
+          border: 2px solid rgba(var(--laser-color-rgb), 0.2);
+          background:
+            radial-gradient(circle at 1px 1px, rgba(var(--laser-color-rgb), 0.18) 0.5px, transparent 0.5px) 0 0 / 14px 14px,
+            rgba(6, 0, 16, 0.85);
+          box-shadow: 0 0 40px rgba(var(--laser-color-rgb), 0.2);
+          overflow: hidden;
         }
 
         @keyframes laser-flow-pulse {
           0%,
           100% {
-            opacity: 0.7;
-            transform: scale(1);
+            opacity: 0.85;
+            filter: blur(2px);
           }
           50% {
-            opacity: 0.95;
-            transform: scale(1.08);
-          }
-        }
-
-        @keyframes laser-flow-sweep {
-          0% {
-            transform: rotate(-10deg) translateY(-45%);
-            opacity: 0.65;
-          }
-          100% {
-            transform: rotate(-4deg) translateY(-55%);
-            opacity: 0.9;
-          }
-        }
-
-        @keyframes laser-flow-sweep-secondary {
-          0% {
-            transform: rotate(8deg) translate(-48%, -52%);
-            opacity: 0.55;
-          }
-          100% {
-            transform: rotate(3deg) translate(-52%, -48%);
-            opacity: 0.85;
+            opacity: 1;
+            filter: blur(1px);
           }
         }
 
         @keyframes laser-flow-glimmer {
-          0%,
-          100% {
-            opacity: 0.25;
-            transform: scale(0.95);
+          0% {
+            opacity: 0.75;
+            transform: translateX(-50%) scaleY(1);
           }
-          50% {
-            opacity: 0.6;
-            transform: scale(1.05);
+          100% {
+            opacity: 0.95;
+            transform: translateX(-50%) scaleY(1.05);
+          }
+        }
+
+        @keyframes laser-flow-fog {
+          0% {
+            opacity: 0.25;
+            filter: blur(26px);
+          }
+          100% {
+            opacity: 0.5;
+            filter: blur(34px);
           }
         }
       `}</style>
